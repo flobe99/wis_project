@@ -1,0 +1,36 @@
+\documentclass[bibliography=totoc]{scrartcl}
+\usepackage[ngerman, english]{babel}
+\usepackage{rwukoma}
+\usepackage[pdfusetitle]{hyperref}
+\usepackage{lipsum,caption}
+\usepackage{acronym}
+\usepackage{algorithm, algpseudocode}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{float}
+
+\setlength{\belowcaptionskip}{5pt}
+
+\title{Document Scanner}
+\author{Leopold Gaube - 34948, IN \\ Florian Betz - 35653, IN}
+\date{\today}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\clearpage
+
+
+
+\clearpage
+\section*{List of Acronyms}
+\addcontentsline{toc}{section}{List of Acronyms}
+
+\begin{acronym}[....]
+    \acro{OpenCV}{Open Source Computer Vision Library}
+    \acro{DSLR}{Digital Single Lens Reflex}
+\end{acronym}
+\bibliographystyle{alpha}
+\bibliography{literature}
+\end{document}
