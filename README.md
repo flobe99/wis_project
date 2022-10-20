@@ -1,11 +1,11 @@
 # wis_project
 
-Algorithmen (3 Stk):
+## Algorithmen (3 Stk):
 *	LAP3
 *	LaMCTS
 *	VOOT
 *	DOO
-Metriken
+## Metriken
 *	Iterationen
 *	Zeit
 *	Anzahl an Proben (samples)
