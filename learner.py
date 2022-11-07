@@ -1,6 +1,7 @@
 import math
 import random
 import numpy as np
+from colorama import Fore, Back, Style
 
 # https://www.geeksforgeeks.org/ml-monte-carlo-tree-search-mcts/
 
@@ -48,6 +49,16 @@ class World:
 
         # arr1[target_x][target_y] = 5
 
+    def heuristic(self, x1, y1):
+
+        return abs(x1 - self.target_x) + abs(y1 - self.target_y)
+
+    def A_star(self):
+
+        depth = 0
+        while 1:
+            pass
+
     def move_predict(self):
         reward_max = 0
         direction_max = []
@@ -74,7 +85,6 @@ class World:
         self.arr2[ftr_x][ftr_y] = reward_max
 
     def move_explore(self):
-        # pass
         reward_max = 0
         direction_max = []
         rnd_directions = []
@@ -87,8 +97,9 @@ class World:
                 print("exploring", direction)
                 rnd_directions.append(i1)
 
-        rnd2 = random.randint(0, len(rnd_directions))
-        direction_max = self.directions[rnd_directions[rnd2]]
+        rnd2 = random.randint(0, len(rnd_directions) - 1)
+        direction_index = rnd_directions[rnd2]
+        direction_max = self.directions[direction_index]
         print("direction chosen", direction_max)
         print("")
         self.pos_x = self.pos_x + direction_max[0]
@@ -111,10 +122,36 @@ class World:
             self.move_predict()
 
 
+def print_board(board):
+    for row in board:
+        for cell in row:
+            # print(int(cell), end="")
+            # print("//")
+
+            if int(cell) == 1:
+                print(Fore.RED + "1 ", end="")
+                # print("cell1:", int(cell))
+            elif int(cell) == 8:
+                print(Fore.YELLOW + "8 ", end="")
+                # print("cell8:", int(cell))
+            elif int(cell) == 3:
+                print(Fore.GREEN + "3 ", end="")
+            else:
+                print(str(int(cell)) + " ", end="")
+
+            print(Fore.RESET, end="")
+
+        print()
+
+
 w1 = World()
+
+# print(print(w1.arr1))
+print_board(w1.arr1)
+
 for i in range(0, 10):
     w1.search()
 print("")
 print(w1.arr2)
 print("")
-print(w1.arr1)
+print_board(w1.arr1)
