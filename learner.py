@@ -85,51 +85,55 @@ class World:
         return pos_directions
 
     def move_predict(self):
-
-        reward_max = -1
-        best_next_position = []
+        reward_max = 0
+        direction_max = []
         print("predicting, current pos", self.pos_x, self.pos_y)
+        for direction in self.directions:
+            ftr_x = self.pos_x + direction[0]
+            ftr_y = self.pos_y + direction[1]
+            if ftr_x >= 0 and ftr_y >= 0 and ftr_x < self.dim_x and ftr_y < self.dim_y:
+                print("exploring", direction)
+                if self.arr1[ftr_x][ftr_y] == 0:
+                    x1 = ftr_x
+                    y1 = ftr_y
+                    r1 = self.reward(x1, y1)
+                    print("reward", r1)
+                    if r1 > reward_max:
+                        reward_max = r1
+                        direction_max = direction
 
-        next_positions = self.position_move()
-        # print("next position", next_positions)
-
-        for position in next_positions:
-            x1 = position[0]
-            y1 = position[1]
-
-            if self.arr1[x1][y1] == 0:
-                r1 = self.reward(x1, y1)
-                print("reward", r1)
-                if r1 > reward_max:
-                    reward_max = r1
-                    best_next_position = position
-
-        print("position chosen", best_next_position)
+        print("direction chosen", direction_max)
         print("")
-        self.pos_x = best_next_position[0]
-        self.pos_y = best_next_position[1]
+        self.pos_x = self.pos_x + direction_max[0]
+        self.pos_y = self.pos_y + direction_max[1]
         self.arr1[self.pos_x][self.pos_y] = 8
-        self.arr2[x1][y1] = reward_max
+        self.arr2[ftr_x][ftr_y] = reward_max
 
     def move_explore(self):
         # pass
         reward_max = 0
-        position_max = []
-        rnd_positions = []
+        direction_max = []
+        rnd_directions = []
         print("exploring, current pos", self.pos_x, self.pos_y)
-        rnd_positions = self.position_move()
-        print(rnd_positions)
+        for i1 in range(0, len(self.directions)):  # direction in self.directions:
+            direction = self.directions[i1]
+            ftr_x = self.pos_x + direction[0]
+            ftr_y = self.pos_y + direction[1]
+            if ftr_x >= 0 and ftr_y >= 0 and ftr_x < self.dim_x and ftr_y < self.dim_y:
+                if self.arr1[ftr_x][ftr_y] == 0:
+                    print("exploring", direction)
+                    rnd_directions.append(i1)
 
-        rnd2 = random.randint(0, len(rnd_positions))
-        position_max = rnd_positions[rnd2]
-        print("position chosen", position_max)
+        rnd2 = random.randint(0, len(rnd_directions))
+        direction_max = self.directions[rnd_directions[rnd2]]
+        print("direction chosen", direction_max)
         print("")
-        self.pos_x = position_max[0]
-        self.pos_y = position_max[1]
-        print("########################")
+        self.pos_x = self.pos_x + direction_max[0]
+        self.pos_y = self.pos_y + direction_max[1]
+
         print(self.pos_x, self.pos_y)
         self.arr1[self.pos_x][self.pos_y] = 8
-        self.arr2[self.pos_x][self.pos_y] = reward_max
+        self.arr2[ftr_x][ftr_y] = reward_max
 
     def reward(self, x1, y1):
         print("reward", x1, y1)
