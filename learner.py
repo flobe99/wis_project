@@ -50,6 +50,16 @@ class World:
 
         # arr1[target_x][target_y] = 5
 
+    def heuristic(self, x1, y1):
+
+        return abs(x1 - self.target_x) + abs(y1 - self.target_y)
+
+    def A_star(self):
+
+        depth = 0
+        while 1:
+            pass
+
     def position_move(self):
         pos_directions = []
         for direction in self.directions:
