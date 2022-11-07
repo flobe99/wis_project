@@ -1,6 +1,8 @@
 import math
 import random
 import numpy as np
+from colorama import Fore, Back, Style
+import time
 
 # https://www.geeksforgeeks.org/ml-monte-carlo-tree-search-mcts/
 
@@ -14,8 +16,8 @@ class World:
         self.arr1 = np.zeros([self.dim_x, self.dim_y])
         self.arr2 = np.zeros([self.dim_x, self.dim_y])
 
-        self.pos_x = 0
-        self.pos_y = 0
+        self.pos_x = 11
+        self.pos_y = 1
 
         self.target_x = 11
         self.target_y = 1
@@ -48,53 +50,61 @@ class World:
 
         # arr1[target_x][target_y] = 5
 
-    def move_predict(self):
-        reward_max = 0
-        direction_max = []
-        print("predicting, current pos", self.pos_x, self.pos_y)
+    def position_move(self):
+        pos_directions = []
         for direction in self.directions:
             ftr_x = self.pos_x + direction[0]
             ftr_y = self.pos_y + direction[1]
-            if ftr_x >= 0 and ftr_y >= 0 and ftr_x < self.dim_x and ftr_y < self.dim_y:
-                print("exploring", direction)
-                if self.arr1[ftr_x][ftr_y] == 0:
-                    x1 = ftr_x
-                    y1 = ftr_y
-                    r1 = 1 / (math.sqrt((x1 - self.target_x) ** 2 + (y1 - self.target_y) ** 2))
-                    print("reward", r1)
-                    if r1 > reward_max:
-                        reward_max = r1
-                        direction_max = direction
 
-        print("direction chosen", direction_max)
+            if ftr_x >= 0 and ftr_y >= 0 and ftr_x < self.dim_x and ftr_y < self.dim_y:
+                if self.arr1[ftr_x][ftr_y] != 1:
+                    pos_directions.append((ftr_x, ftr_y))
+        return pos_directions
+
+    def move_predict(self):
+
+        reward_max = -1
+        best_next_position = []
+        print("predicting, current pos", self.pos_x, self.pos_y)
+
+        next_positions = self.position_move()
+        # print("next position", next_positions)
+
+        for position in next_positions:
+            x1 = position[0]
+            y1 = position[1]
+
+            if self.arr1[x1][y1] == 0:
+                r1 = self.reward(x1, y1)
+                print("reward", r1)
+                if r1 > reward_max:
+                    reward_max = r1
+                    best_next_position = position
+
+        print("position chosen", best_next_position)
         print("")
-        self.pos_x = self.pos_x + direction_max[0]
-        self.pos_y = self.pos_y + direction_max[1]
+        self.pos_x = best_next_position[0]
+        self.pos_y = best_next_position[1]
         self.arr1[self.pos_x][self.pos_y] = 8
-        self.arr2[ftr_x][ftr_y] = reward_max
+        self.arr2[x1][y1] = reward_max
 
     def move_explore(self):
         # pass
         reward_max = 0
-        direction_max = []
-        rnd_directions = []
+        position_max = []
+        rnd_positions = []
         print("exploring, current pos", self.pos_x, self.pos_y)
-        for i1 in range(0, len(self.directions)):  # direction in self.directions:
-            direction = self.directions[i1]
-            ftr_x = self.pos_x + direction[0]
-            ftr_y = self.pos_y + direction[1]
-            if ftr_x >= 0 and ftr_y >= 0 and ftr_x < self.dim_x and ftr_y < self.dim_y:
-                print("exploring", direction)
-                rnd_directions.append(i1)
+        rnd_positions = self.position_move()
+        print(rnd_positions)
 
-        rnd2 = random.randint(0, len(rnd_directions))
-        direction_max = self.directions[rnd_directions[rnd2]]
-        print("direction chosen", direction_max)
+        rnd2 = random.randint(0, len(rnd_positions) - 1)
+        position_max = rnd_positions[rnd2]
+        print("position chosen", position_max)
         print("")
-        self.pos_x = self.pos_x + direction_max[0]
-        self.pos_y = self.pos_y + direction_max[1]
+        self.pos_x = position_max[0]
+        self.pos_y = position_max[1]
         self.arr1[self.pos_x][self.pos_y] = 8
-        self.arr2[ftr_x][ftr_y] = reward_max
+        self.arr2[self.pos_x][self.pos_y] = reward_max
 
     def reward(self, x1, y1):
         print("reward", x1, y1)
@@ -110,11 +120,34 @@ class World:
         else:
             self.move_predict()
 
+    def print_board(self, board):
+        for row in board:
+            for cell in row:
+                if int(cell) == 1:
+                    print(Fore.RED + "1 ", end="")
+                elif int(cell) == 8:
+                    print(Fore.YELLOW + "8 ", end="")
+                elif int(cell) == 3:
+                    print(Fore.GREEN + "3 ", end="")
+                else:
+                    print(str(int(cell)) + " ", end="")
+
+                print(Fore.RESET, end="")
+
+            print()
+
 
 w1 = World()
-for i in range(0, 10):
+
+# print(print(w1.arr1))
+w1.print_board(w1.arr1)
+
+for i in range(0, 100):
+    print("iteration nr: ", i)
+    time.sleep(1)
     w1.search()
+    w1.print_board(w1.arr1)
 print("")
 print(w1.arr2)
 print("")
-print(w1.arr1)
+w1.print_board(w1.arr1)
