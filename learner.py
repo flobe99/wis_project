@@ -2,6 +2,7 @@ import math
 import random
 import numpy as np
 
+# https://www.geeksforgeeks.org/ml-monte-carlo-tree-search-mcts/
 
 class World():
 	def __init__(self):
@@ -9,8 +10,8 @@ class World():
 		self.dim_x = 12
 		self.dim_y = 12
 
-		self.arr1 = np.zeros([12, 12])
-		self.arr2 = np.zeros([12, 12])
+		self.arr1 = np.zeros([self.dim_x, self.dim_y])
+		self.arr2 = np.zeros([self.dim_x, self.dim_y])
 
 		self.pos_x = 0
 		self.pos_y = 0
@@ -41,6 +42,8 @@ class World():
 		self.arr1[6][8] = 1
 		self.arr1[5][8] = 1
 		self.arr1[4][8] = 1
+
+		self.leaves = []
 
 		# arr1[target_x][target_y] = 5
 
