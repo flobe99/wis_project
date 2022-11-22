@@ -48,7 +48,7 @@ class World:
         self.arr1[5][8] = 1
         self.arr1[4][8] = 1
 
-        self.leaves = []
+        self.tree = {'action': [0], 'ucb': -5, 'position':[self.pos_x, self.pos_y], 'hierarchy_layer':0, 'children': []}
 
         # arr1[target_x][target_y] = 5
 
@@ -75,7 +75,7 @@ class World:
         self.arr1[start[0]][start[1]] = 3
         self.arr1[goal[0]][goal[1]] = 3
 
- def pos_directions(self):
+    def get_directions(self):
         self.possible_directions = []
         # print('predicting, current pos', self.pos_x, self.pos_y)
         for i1 in range(0, len(self.directions)):
@@ -97,7 +97,8 @@ class World:
             ftr_y = self.pos_y + direction[1]
             x1 = ftr_x
             y1 = ftr_y
-            r1 = 1/(math.sqrt((x1-self.target_x)**2 + (y1-self.target_y)**2))
+            r1 = self.reward(x1, y1)
+            # r1 = 1/(math.sqrt((x1-self.target_x)**2 + (y1-self.target_y)**2))
             if r1 > reward_max:
                 reward_max = r1
                 direction_max = direction
@@ -133,7 +134,7 @@ class World:
             rnd1 = random.random()
             rnd1 = 0.8130436593743464
             print("rnd", rnd1)
-            self.pos_directions()
+            self.get_directions()
             if rnd1 < self.epsilon:
                 self.move_explore()
             else:
@@ -156,6 +157,74 @@ class World:
 
             print()
 
+    def treesearch(self, leaf1):
+        self.tree_select(self.tree)
+        # pos1 = leaf1['position']
+        # self.pos_x = pos1[0]
+        # self.pos_y = pos1[1]
+        # self.get_directions()
+        # for i1 in self.possible_directions:
+        #     direction = self.directions[i1]
+        #     ftr_x = self.pos_x + direction[0]
+        #     ftr_y = self.pos_y + direction[1]
+        #     r1 = self.reward(ftr_x, ftr_y)
+        #     leaf1 = {'action': [i1], 'ucb': r1, 'position':[ftr_x, ftr_y], 'leaves': []}
+        #     leaf1.append(leaf1)
+        # print('tree:')
+        # print(leaves1)
+
+    def tree_select(self, leaf):
+        children1 = leaf['children']
+        if len(children1) > 0:
+            leaf_current = {}
+            ucb = -5
+            for leaf in leaves:
+                if leaf['ucb'] > ucb:
+                    ucb = leaf['ucb']
+                    leaf_current = leaf
+            self.tree_select(leaf_current)
+        else:
+            self.tree_expand(leaf)
+
+    def tree_expand(self, leaf):
+        leaf_position = leaf['position']
+        self.pos_x = leaf_position[0]
+        self.pos_y = leaf_position[1]
+        self.get_directions()
+
+        reward1 = leaf['ucb']
+        reward_temp = -5
+        leaf1 = {}
+
+        for i1 in self.possible_directions:
+            direction = self.directions[i1]
+            ftr_x = self.pos_x + direction[0]
+            ftr_y = self.pos_y + direction[1]
+            r1 = self.reward(ftr_x, ftr_y)
+            if r1 > reward_temp:
+                reward_temp = r1
+                leaf1 = {'action': [i1], 'ucb': r1, 'position':[ftr_x, ftr_y], 'leaves': []}
+
+        if reward_temp > -5:
+            leaf['children'].append(leaf1)
+        else:
+            rnd1 = random.random()
+            if rnd1 < self.epsilon:
+                rnd2 = random.randint(0, len(self.possible_directions))
+                direction = self.directions[rnd2]
+                ftr_x = self.pos_x + direction[0]
+                ftr_y = self.pos_y + direction[1]
+                r1 = self.reward(ftr_x, ftr_y)
+                leaf1 = {'action': [i1], 'ucb': r1, 'position':[ftr_x, ftr_y], 'leaves': []}
+
+
+    def tree_sim(self):
+        pass
+
+    def tree_backprop(self):
+        pass
+
+
 
 w1 = World()
 
@@ -163,12 +232,14 @@ w1 = World()
 # print("\nStart Grid")
 # w1.print_board(w1.arr1)
 
+w1.treesearch(w1.tree)
+
 
 w1.search()  # search with random search
 
-# w1.a_star()  # search with AStar
-# print("\nAStar Path")
-# w1.print_board(w1.arr1)
+w1.a_star()  # search with AStar
+print("\nAStar Path")
+w1.print_board(w1.arr1)
 
 print("")
 print("Arr2")
@@ -176,3 +247,5 @@ print(w1.arr2)
 print("")
 
 w1.print_board(w1.arr1)
+
+print(w1.tree)
