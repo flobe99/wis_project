@@ -5,6 +5,11 @@ from colorama import Fore, Back, Style
 import time
 import pyastar2d
 
+from montecarlo.gridworld import GridWorld
+from montecarlo.montecarlo import MonteCarlo
+from montecarlo.visualization import Visualization
+from montecarlo.obstacles import Obstacle
+from montecarlo.agent import Agent
 
 # https://www.geeksforgeeks.org/ml-monte-carlo-tree-search-mcts/
 
@@ -31,26 +36,36 @@ class World:
 
         self.possible_directions = []
 
-        self.arr1[0][5] = 1
-        self.arr1[1][5] = 1
-        self.arr1[2][5] = 1
-        self.arr1[3][5] = 1
-        self.arr1[7][0] = 1
-        self.arr1[7][1] = 1
-        self.arr1[7][2] = 1
-        self.arr1[7][3] = 1
-        self.arr1[7][4] = 1
-        self.arr1[7][5] = 1
-        self.arr1[7][6] = 1
-        self.arr1[7][7] = 1
-        self.arr1[7][8] = 1
-        self.arr1[6][8] = 1
-        self.arr1[5][8] = 1
-        self.arr1[4][8] = 1
+        self.obstacle_list = np.array(
+            [
+                (0, 4),
+                (1, 4),
+                (2, 4),
+                (3, 4),
+                (7, 0),
+                (7, 1),
+                (7, 2),
+                (7, 3),
+                (7, 4),
+                (7, 4),
+            ]
+        )
+
+        for i in self.obstacle_list:
+            x_pos = i[0]
+            y_pos = i[1]
+            self.arr1[x_pos][y_pos] = 1
+
+        # print(self.arr1)
 
         self.leaves = []
 
         # arr1[target_x][target_y] = 5
+
+    def mcts(self):
+        gridworld = GridWorld((12, 12), 1, 0.1, 12, False, obstacle_list=self.obstacle_list)
+        mc = MonteCarlo(gridworld, mode=0)
+        mc.run()
 
     def a_star_cost_array(self):
         temp_arr = np.copy(self.arr1)
