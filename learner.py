@@ -38,16 +38,22 @@ class World:
 
         self.obstacle_list = np.array(
             [
-                (0, 4),
-                (1, 4),
-                (2, 4),
-                (3, 4),
+                (0, 5),
+                (1, 5),
+                (2, 5),
+                (3, 5),
                 (7, 0),
                 (7, 1),
                 (7, 2),
                 (7, 3),
                 (7, 4),
-                (7, 4),
+                (7, 5),
+                (7, 6),
+                (7, 7),
+                (7, 8),
+                (6, 8),
+                (5, 8),
+                (4, 8),
             ]
         )
 
@@ -63,7 +69,7 @@ class World:
         # arr1[target_x][target_y] = 5
 
     def mcts(self):
-        gridworld = GridWorld((12, 12), 1, 0.1, 12, False, obstacle_list=self.obstacle_list)
+        gridworld = GridWorld((12, 12), 1, 0.1, 2, False, obstacle_list=self.obstacle_list)
         mc = MonteCarlo(gridworld, mode=0)
         mc.run()
 
