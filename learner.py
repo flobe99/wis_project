@@ -3,7 +3,10 @@ import random
 import numpy as np
 from colorama import Fore, Back, Style
 import time
+import sys
 import pyastar2d
+from matplotlib import pyplot as plt
+sys.setrecursionlimit(1500000000)
 
 
 # https://www.geeksforgeeks.org/ml-monte-carlo-tree-search-mcts/
@@ -24,29 +27,12 @@ class World:
         self.target_x = 11
         self.target_y = 1
 
-        self.arr1[self.pos_x][self.pos_y] = 8
-        self.arr1[self.target_x][self.target_y] = 3
+        self.reset_board()
 
         self.directions = [[0, 0], [0, 1], [0, -1], [1, 0], [1, 1], [1, -1], [-1, 0], [-1, 1], [-1, -1]]
+        # self.directions = [[0, 1], [0, -1], [1, 0], [1, 1], [1, -1], [-1, 0], [-1, 1], [-1, -1]]
 
         self.possible_directions = []
-
-        self.arr1[0][5] = 1
-        self.arr1[1][5] = 1
-        self.arr1[2][5] = 1
-        self.arr1[3][5] = 1
-        self.arr1[7][0] = 1
-        self.arr1[7][1] = 1
-        self.arr1[7][2] = 1
-        self.arr1[7][3] = 1
-        self.arr1[7][4] = 1
-        self.arr1[7][5] = 1
-        self.arr1[7][6] = 1
-        self.arr1[7][7] = 1
-        self.arr1[7][8] = 1
-        self.arr1[6][8] = 1
-        self.arr1[5][8] = 1
-        self.arr1[4][8] = 1
 
         self.leaf_id = 1
         self.tree_width = 3
@@ -128,12 +114,18 @@ class World:
         self.arr1[self.pos_x][self.pos_y] = 8
         # self.arr2[ftr_x][ftr_y] = reward_max
 
+
     def reward(self, x1, y1):
         # print('reward', x1, y1)
-        reward2 = 1 / (math.sqrt((x1 - self.target_x) ** 2 + (y1 - self.target_y) ** 2))
+        reward2 = -5
+        try:
+            reward2 = 1 / (math.sqrt((x1 - self.target_x) ** 2 + (y1 - self.target_y) ** 2))
+        except:
+            reward2 = 100
         # reward3 = 1 / reward2
         # print(reward2, reward3)
-        return reward2
+        return reward2*10
+
 
     def search(self):
         for i in range(0, 1):
@@ -146,6 +138,31 @@ class World:
             else:
                 self.move_predict()
             self.print_board(self.arr1)
+
+
+    def reset_board(self):
+        for i in range(0, self.dim_x):
+            for j in range(0, self.dim_y):
+                self.arr1[i][j] = 0
+        self.arr1[self.pos_x][self.pos_y] = 8
+        self.arr1[self.target_x][self.target_y] = 3
+
+        self.arr1[0][5] = 1
+        self.arr1[1][5] = 1
+        self.arr1[2][5] = 1
+        self.arr1[3][5] = 1
+        self.arr1[7][0] = 1
+        self.arr1[7][1] = 1
+        self.arr1[7][2] = 1
+        self.arr1[7][3] = 1
+        self.arr1[7][4] = 1
+        self.arr1[7][5] = 1
+        self.arr1[7][6] = 1
+        self.arr1[7][7] = 1
+        self.arr1[7][8] = 1
+        self.arr1[6][8] = 1
+        self.arr1[5][8] = 1
+        self.arr1[4][8] = 1
 
 
     def print_board(self, board):
@@ -165,31 +182,8 @@ class World:
             print()
 
 
-    def treewalk(self):
-        reward_temp = -5
-        id_temp = 0
-        dir_list = []
-        for leaf1 in self.treeleaves:
-            if leaf1['reward'] > reward_temp:
-                reward_temp = leaf1['reward']
-                id_temp = leaf1['id']
-
-        while(id_temp != 0):
-            for leaf2 in self.treeleaves:
-                if leaf2['id'] == id_temp:
-                    id_temp = leaf2['parent']
-                    dir_list.append(leaf2['parent_action'][0])
-        print('dirlist')
-        print(dir_list)
-        self.pos_x = self.treeleaves[0]['position'][0]
-        self.pos_y = self.treeleaves[0]['position'][1]
-        for dir1 in dir_list:
-            self.pos_x = self.pos_x + self.directions[dir1][0]
-            self.pos_y = self.pos_y + self.directions[dir1][1]
-            self.arr1[self.pos_x][self.pos_y] = 8
-
-    def treesearch(self):
-        for i in range(0, 20):
+    def treesearch_simple(self, hm_loops):
+        for i in range(0, hm_loops):
             print('treesearch', i)
             self.tree_select(1)
 
@@ -206,34 +200,41 @@ class World:
                 if leaf1['reward'] > reward_temp:
                     index_temp = leaf1['id']
                     reward_temp = leaf1['reward']
+        print('treeleaves', leaves_arr)
 
         if len(leaves_arr) <= 0:
+            print('tr exp')
             self.tree_expand(leaf_id)
         else:
             rnd1 = random.random()
             # rnd1 = 0.8130436593743464
             if rnd1 < self.epsilon:
-                rnd2 = random.randint(0, len(leaves_arr))
-                self.tree_select(rnd2)
+                rnd2 = random.randint(0, len(leaves_arr)-1)
+                print('rnd sel', rnd2)
+                self.tree_select(leaves_arr[rnd2])
             else:
+                print('rew sel')
                 self.tree_select(index_temp)
 
-    #self.treeleaves.append({'id':self.leaf_id, 'parent':0, 'partent_action': [0], 'reward': -5, 'position':[self.pos_x, self.pos_y]})
 
     def tree_expand(self, leaf_id):
         print('tree_expand')
         arr1 = self.tree_sim(leaf_id)
         leaves_add = min(len(arr1), self.tree_width)
         print(self.directions)
+        print(arr1)
         for i in range(0, leaves_add):
             direction1 = arr1[i][1]
             ftr_x = self.pos_x + self.directions[direction1][0]
             ftr_y = self.pos_y + self.directions[direction1][1]
-            self.treeleaves.append({'id':self.leaf_id, 'parent':leaf_id, 'parent_action': [arr1[i][1]], 'reward': arr1[i][0], 'position':[ftr_x, ftr_y]})
-            self.leaf_id = self.leaf_id + 1
-        print('treeleaves')
-        print(self.treeleaves)
-        print('')
+            if self.arr1[ftr_x][ftr_y] != 2:
+                self.treeleaves.append({'id':self.leaf_id, 'parent':leaf_id, 'parent_action': [arr1[i][1]], 'reward': arr1[i][0], 'position':[ftr_x, ftr_y]})
+                self.leaf_id = self.leaf_id + 1
+                self.arr1[ftr_x][ftr_y] = 2
+        # print('treeleaves')
+        # for treeleaf in self.treeleaves:
+        #     print(treeleaf)
+        # print('')
 
 
     def tree_sim(self, leaf_id):
@@ -245,21 +246,51 @@ class World:
                 self.pos_x = arr_pos[0]
                 self.pos_y = arr_pos[1]
         self.get_directions()
+        # print('directions poss')
         # print(self.possible_directions)
+        selection = random.sample(self.possible_directions, 3)
         # print(self.directions)
-        for dir1 in self.possible_directions:
+        for dir1 in selection:
             direction = self.directions[dir1]
             ftr_x = self.pos_x + direction[0]
             ftr_y = self.pos_y + direction[1]
             reward1 = self.reward(ftr_x, ftr_y)
             list1.append([reward1, dir1])
         list1.sort(reverse=True)
-        print(list1)
+        # print(list1)
         return list1
+
 
     def tree_backprop(self, leaf_id):
         pass
 
+
+    def treesearch_partition(self):
+        self.sample()
+
+
+    def treewalk(self):
+        reward_temp = -5
+        id_temp = 0
+        dir_list = []
+        for leaf1 in self.treeleaves:
+            if leaf1['reward'] > reward_temp:
+                reward_temp = leaf1['reward']
+                id_temp = leaf1['id']
+
+        while(id_temp != 0):
+            for leaf2 in self.treeleaves:
+                if leaf2['id'] == id_temp:
+                    id_temp = leaf2['parent']
+                    dir_list = leaf2['parent_action'] + dir_list
+        print('dirlist')
+        print(dir_list)
+        self.pos_x = self.treeleaves[0]['position'][0]
+        self.pos_y = self.treeleaves[0]['position'][1]
+        for dir1 in dir_list:
+            self.pos_x = self.pos_x + self.directions[dir1][0]
+            self.pos_y = self.pos_y + self.directions[dir1][1]
+            self.arr1[self.pos_x][self.pos_y] = 8
 
 
 w1 = World()
@@ -268,14 +299,16 @@ w1 = World()
 # print("\nStart Grid")
 # w1.print_board(w1.arr1)
 
-w1.treesearch()
+w1.treesearch_simple(800)
 
-
+print('board1')
+w1.print_board(w1.arr1)
 w1.treewalk()  # search with random search
 
 # w1.a_star()  # search with AStar
 # print("\nAStar Path")
-w1.print_board(w1.arr1)
+# w1.print_board(w1.arr1)
+
 
 print("")
 print("Arr2")
@@ -283,5 +316,21 @@ print(w1.arr2)
 print("")
 
 w1.print_board(w1.arr1)
+
+plt.figure(1)
+plt.grid()
+for i in range(0, w1.dim_x):
+    for j in range(0, w1.dim_y):
+        if w1.arr1[i][j] == 1:
+            plt.scatter(j, -i, color='red', marker='s')
+for treeleaf in w1.treeleaves:
+    plt.scatter(treeleaf['position'][1], treeleaf['position'][0]*-1, color='black', s=100, alpha=0.20)
+    for leaf2 in w1.treeleaves:
+        if leaf2['id'] == treeleaf['parent']:
+            pos2x = leaf2['position'][0]
+            pos2y = leaf2['position'][1]
+            plt.plot([treeleaf['position'][1], pos2y], [treeleaf['position'][0]*-1, pos2x*-1], color='blue', linestyle='dashed')
+# plt.plot([0, 1], [1, 1])
+plt.show()
 
 # print(w1.treeleaves)
