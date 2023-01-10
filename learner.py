@@ -6,6 +6,8 @@ import time
 import sys
 import pyastar2d
 from matplotlib import pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn import svm
 sys.setrecursionlimit(1500000000)
 
 
@@ -293,13 +295,53 @@ class World:
             self.arr1[self.pos_x][self.pos_y] = 8
 
 
+    def lamcts(self):
+        X1 = []
+        y1 = []
+        for i1 in range(0, 15):
+            rndx = random.randint(0, self.dim_x-1)
+            rndy = random.randint(0, self.dim_y-1)
+            if self.arr1[rndx][rndy] != 1:
+                X1.append([rndx, rndy])
+                y1.append([self.reward(rndx, rndy)])
+            else:
+                i1 = i1 - 1
+        print('X1', X1)
+        print('y1', y1)
+        kmeans = KMeans(n_clusters=2, random_state=0).fit(y1)
+        print('kmeans labels')
+        labels1 = kmeans.labels_
+        print(labels1)
+        clf = svm.SVC(kernel='linear')
+        clf.fit(X1, labels1)
+        for i2 in range(0, len(labels1)):
+            x2 = X1[i2][0]
+            y2 = X1[i2][1]
+            print('label:', labels1[i2])
+            # if labels1[i2] == 1:
+            #     self.arr1[x2][y2] = 2
+            # if labels1[i2] == 0:
+            #     self.arr1[x2][y2] = 9
+        for i3 in range(0, self.dim_x):
+            for j3 in range(0, self.dim_y):
+                if self.arr1[i3][j3] != 1:
+                    pred = clf.predict([[i3, j3]])
+                    if pred[0] == 0:
+                        self.arr1[i3][j3] = 9
+                    if pred[0] == 1:
+                        self.arr1[i3][j3] = 2
+        # print('prediction', clf.predict([[3, 10]]))
+
+
+
 w1 = World()
 
 # print(print(w1.arr1))
 # print("\nStart Grid")
 # w1.print_board(w1.arr1)
 
-w1.treesearch_simple(800)
+# w1.treesearch_simple(800)
+w1.lamcts()
 
 print('board1')
 w1.print_board(w1.arr1)
