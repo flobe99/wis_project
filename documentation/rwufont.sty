@@ -3,7 +3,7 @@
 
 \RequirePackage{kvoptions}
 \RequirePackage{ifthen}
-\RequirePackage{fontspec}
+%\RequirePackage{fontspec}
 
 \SetupKeyvalOptions{
 	family=rwufont,
@@ -14,10 +14,10 @@
 
 \ProcessKeyvalOptions*
 
-\setsansfont[Ligatures=TeX]{Barlow Semi Condensed}
+%\setsansfont[Ligatures=TeX]{Barlow Semi Condensed}
 
 \ifthenelse{\equal{\rwufont@fontsetup}{barlowsc}}{
-	\setmainfont[Ligatures=TeX]{Barlow Semi Condensed}
+	%\setmainfont[Ligatures=TeX]{Barlow Semi Condensed}
 }{
 	\ifthenelse{\equal{\rwufont@fontsetup}{barlow}}{
 		\setmainfont[Ligatures=TeX]{Barlow}
