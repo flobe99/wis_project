@@ -1,135 +1,139 @@
-\documentclass[bibliography=totoc]{scrartcl}
-\usepackage[ngerman, english]{babel}
-\usepackage{rwukoma}
-\usepackage[pdfusetitle]{hyperref}
-\usepackage{lipsum,caption}
-\usepackage{acronym}
-\usepackage{algorithm, algpseudocode}
-\usepackage{graphicx}
-\usepackage{subcaption}
-\usepackage{listings}
-\usepackage{float}
-\usepackage{todonotes}
-\usepackage{amsmath}
-
-\setlength{\belowcaptionskip}{5pt}
-
-\title{Path Planning}
-\author{Manuel Gnannt - XXXXX, IN \\ Florian Betz - 35653, IN}
-\date{\today}
-\begin{document}
-\maketitle
-\tableofcontents
-
-\clearpage
-\section{Introduce}
-
-This paper explores the topic of path planning, with a focus on three specific algorithms: A*, LaMCTS, and LaP3. Path planning is an important aspect of robotics and artificial intelligence, as it enables robots and other autonomous systems to navigate through an environment and reach a desired destination. The A* algorithm is a well-known and widely used method for pathfinding and graph traversal, which incorporates heuristic functions and predicted costs to find the most efficient path. LaMCTS and LaP3, on the other hand, are more recent algorithms that have been developed to address specific challenges in path planning, such as handling large or complex environments.
-
-\section{Evaluation Criteria} \label{corner_detection}
-
-\subsection{Time Complexity}
-The time complexity of an algorithm is a measure of the execution time of the algorithm, which is calculated by summing the frequency of all statements in the algorithm. The statement frequency is the number of times a statement is executed and it is closely related to the size of the problem that the algorithm is solving. When the problem size is represented by $T(n)$, the statement frequency can be expressed as a function of $T(n)$ and the time complexity of the algorithm can also be expressed as a function of $T(n)$.
-Common scales for measuring time complexity include constant order $O(1)$, logarithmic order $O(log(n))$, linear order $O(n)$, linear logarithmic order $O(nlog(n))$, square order $O(n^2)$, cubic order $O(n^3)$, kth order $O(n^k)$ and exponential order $O(2^n)$.
-
-\subsection{Space Complexity}
-Space complexity is a metric that expresses the amount of temporary storage space utilized by an algorithm during its execution. 
-It is represented as $O(f(n))$, where $f(n)$ is the function that describes the storage space required by the algorithm. 
-The amount of temporary storage space used during runtime can differ between different algorithms. 
-Some algorithms only require a minimal amount of temporary space and remain constant regardless of the size of the problem and are called "in-situ" which means space-efficient. 
-While other algorithms use multiple temporary work units that are related to the size of the problem, represented as n, and increases as n increases. 
-When n is large, more storage units will be utilized, resulting in a higher space complexity.
-
-\subsection{Search Efficiency}
-
-Global path planning algorithms create paths based on pre-existing information, while local path planning algorithms generate paths by gathering information about the environment via a sensor. 
-Regardless of the algorithm, it must possess the capability to react quickly to environmental information, have low computational requirements and short search time, and have high search efficiency. Different algorithms exhibit varying levels of search efficiency. 
-For instance, the A* algorithm possesses the advantage of quickly responding to the environment and is a simple search algorithm.
-
-\subsection{Adaptability}
-There are various path planning algorithms available, and the degree of adaptability varies among them depending on the design of the algorithm principles and computational performance. 
-The more versatile an algorithm is in adapting to different scenarios such as dense or sparse graphs, graphs with positive or negative edge weights, and shortest paths with single or multiple sources, the more effective it is. 
-
-\section{Path Planning Algorithms}
-\label{path_planning_algorithm}
-
-\subsection{A*}
-The A* algorithm, first introduced by Peter Hart and other researchers at the Stanford Research Institute in 1968, is a widely used method for pathfinding and graph traversal. \cite{4082128} It builds on Dijkstra's algorithm by incorporating heuristic functions and predicted costs, making it the most efficient direct search method for finding the shortest paths in a static road network and a popular heuristic for various other problems.\cite{ProbabilisticApproachCollaborativeMultiRobotLocalization}
-
-The key component of the algorithm is the design of the valuation function, $f(n) = g(n) + h(n)$, where $g(n)$ is the actual cost from the initial node to node n, $h(n)$ is the estimated cost from node n to the target node, and $f(n)$ is the estimated cost from the initial node via node n to the target node.
-
-The steps of the A* algorithm are:
-
-\textbf{Step 1:} Add the starting node to the priority queue.
-
-\textbf{Step 2:} Select the node with the smallest F-value from the current priority queue and make it the current node.
-
-\textbf{Step 3:} Mark it as visited and process its adjacent nodes.
-
-\textbf{Step 4:} If the neighboring node has not been visited, add it to the queue, set the current node as its parent, and record its F, H, and G values. If the neighboring node has already been visited, check if the current node has a shorter path by comparing G values. If the current node has a smaller G value, update the parent node and G, H values of that node.
-
-\textbf{Step 5:} Repeat steps 2 to 4 until the target node is marked or the priority queue is empty.
-
-\textbf{Step 6:} When the path is found, trace back from the endpoint to the start node using the parent node.
-
-The A* algorithm can reach a time complexity of $O(n)$.
-
-
-\subsection{LaMCTS}
-Starting from a start node a start node, a child node is selected and added to the search tree.
-These strategie thus consist of four basic steps, which will be described will be explained in more detail in the following.
-\subsubsection{Selektion}
-With the help of an evaluation function (heuristic), the selection of a node s follows. 
-However, it should be noted that non-preferred nodes should also be considered.
-In some cases, the non-preferred nodes may have a higher value.With the help of an evaluation function (heuristic), the selection of a node s follows. 
-However, it should be noted that non-preferred nodes should also be considered.
-In some cases, the non-preferred nodes may have a higher value.
-
-\subsubsection{Expansion} 
-In this step, the children of the selected node s are considered. 
-If there are one or more children that have not yet been expanded, these children are added to the search tree.
-These children are added to the search tree. 
-However, if all children of the nodes have been expanded, then another or also a child node s is selected and
-the expansion step is then executed on the nodes.
-
-\subsubsection{Simulation} 
-The search policy follows from this step. Here, playouts are executed on the newly added child nodes.
-child nodes that have been added. There are also two options for the playout.
-One chooses purely random moves without knowing the rules of the game.
-One uses a heuristic so that there is less randomness present
-Looking at the last moves, which lets you know beforehand if you missed/achieved the goal).
-In a nutshell, it means that from the newly added child node to a hand
-random moves are chosen.
-
-\subsubsection{Backpropagation}
-Finally, the last step Backpropagation occurs. After a leaf is reached by the simulation, all nodes in the search tree are updated.
-In addition, for each node j traversed, the simulation number nj is incremented by one is increased.
-
-\subsection{LaP3}
-
-The \ac{LaP3} algorithm is an extensions of the LaMCTS. \cite{NEURIPS2021_03a3655f}
-It is a new path planning method which improves the function value estimation within each sub-region.
-This algorithm use a latent representation of the search space.
-\ac{LaP3} and \ac{LaMCTS} use the maximum, instead of the mean, as the node score to improve sample efficiency.
-
-\section{Evaluation}
-
-
-\section{Conclusions and Further Discussion}
-
-
-\clearpage
-
-
-\section*{Acronyms} 
-\addcontentsline{toc}{section}{Acronyms}
-
-\begin{acronym}[....]
-    \acro{LaP3}{Latent Space Partitions for Path Planning}
-    \acro{LaMCTS}{Latent Space Monte Carlo Tree Search}
-\end{acronym}
-
-\bibliographystyle{alpha}
-\bibliography{literature}
-\todo[inline]{Alphabetisch sortieren}
-\end{document}
+\documentclass[bibliography=totoc]{scrartcl}
+\usepackage[ngerman, english]{babel}
+\usepackage{rwukoma}
+\usepackage[pdfusetitle]{hyperref}
+\usepackage{lipsum,caption}
+\usepackage{acronym}
+\usepackage{algorithm, algpseudocode}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{todonotes}
+\usepackage{amsmath}
+
+\setlength{\belowcaptionskip}{5pt}
+
+\title{Path Planning}
+\author{Manuel Gnannt - XXXXX, IN \\ Florian Betz - 35653, IN}
+\date{\today}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\clearpage
+\section{Introduce}
+
+This paper explores the topic of path planning, with a focus on three specific algorithms A*, LaMCTS, and LaP3. 
+Path planning is an important aspect of robotics and artificial intelligence, as it enables robots and other autonomous systems to navigate through an environment and reach a desired destination. 
+The A* algorithm is a well-known and widely used method for pathfinding and graph traversal, which incorporates heuristic functions and predicted costs to find the most efficient path. 
+LaMCTS and LaP3, on the other hand, are more recent algorithms that have been developed to address specific challenges in path planning, such as handling large or complex environments.
+
+\section{Evaluation Criteria} \label{corner_detection}
+
+\subsection{Time Complexity}
+The time complexity of an algorithm is a measure of the execution time of the algorithm, which is calculated by summing the frequency of all statements in the algorithm. 
+The statement frequency is the number of times a statement is executed and it is closely related to the size of the problem that the algorithm is solving. 
+When the problem size is represented by $T(n)$, the statement frequency can be expressed as a function of $T(n)$ and the time complexity of the algorithm can also be expressed as a function of $T(n)$. \cite[p. 248 l. 22 ]{TheoryComputation}
+Common scales for measuring time complexity include constant order $O(1)$, logarithmic order $O(log(n))$, linear order $O(n)$, linear logarithmic order $O(nlog(n))$, square order $O(n^2)$, cubic order $O(n^3)$, kth order $O(n^k)$ and exponential order $O(2^n)$.
+
+\subsection{Space Complexity}
+Space complexity is a metric that expresses the amount of temporary storage space utilized by an algorithm during its execution. 
+It is represented as $O(f(n))$, where $f(n)$ is the function that describes the storage space required by the algorithm. \cite[p. 303]{TheoryComputation}
+The amount of temporary storage space used during runtime can differ between different algorithms. 
+Some algorithms only require a minimal amount of temporary space and remain constant regardless of the size of the problem and are called "in-situ" which means space-efficient. 
+While other algorithms use multiple temporary work units that are related to the size of the problem, represented as n, and increases as n increases. 
+When n is large, more storage units will be utilized, resulting in a higher space complexity.
+
+\subsection{Search Efficiency}
+
+Global path planning algorithms create paths based on pre-existing information, while local path planning algorithms generate paths by gathering information about the environment via a sensor. 
+Regardless of the algorithm, it must possess the capability to react quickly to environmental information, have low computational requirements and short search time, and have high search efficiency. Different algorithms exhibit varying levels of search efficiency. 
+
+\subsection{Adaptability}
+There are various path planning algorithms available, and the degree of adaptability varies among them depending on the design of the algorithm principles and computational performance. 
+The more versatile an algorithm is in adapting to different scenarios such as dense or sparse graphs, graphs with positive or negative edge weights, and shortest paths with single or multiple sources, the more effective it is. 
+
+\section{Path Planning Algorithms}
+\label{path_planning_algorithm}
+
+\subsection{A*}
+The A* algorithm, first introduced by Peter Hart and other researchers at the Stanford Research Institute in 1968, is a widely used method for pathfinding and graph traversal. \cite{4082128} It builds on Dijkstra's algorithm by incorporating heuristic functions and predicted costs, making it the most efficient direct search method for finding the shortest paths in a static road network and a popular heuristic for various other problems.\cite{ProbabilisticApproachCollaborativeMultiRobotLocalization}
+
+The key component of the algorithm is the design of the valuation function, $f(n) = g(n) + h(n)$, where $g(n)$ is the actual cost from the initial node to node n, $h(n)$ is the estimated cost from node n to the target node, and $f(n)$ is the estimated cost from the initial node via node n to the target node.
+
+The steps of the A* algorithm are:
+
+\textbf{Step 1:} Add the starting node to the priority queue.
+
+\textbf{Step 2:} Select the node with the smallest F-value from the current priority queue and make it the current node.
+
+\textbf{Step 3:} Mark it as visited and process its adjacent nodes.
+
+\textbf{Step 4:} If the neighboring node has not been visited, add it to the queue, set the current node as its parent, and record its F, H, and G values. If the neighboring node has already been visited, check if the current node has a shorter path by comparing G values. If the current node has a smaller G value, update the parent node and G, H values of that node.
+
+\textbf{Step 5:} Repeat steps 2 to 4 until the target node is marked or the priority queue is empty.
+
+\textbf{Step 6:} When the path is found, trace back from the endpoint to the start node using the parent node.
+
+The A* algorithm can reach a time complexity of $O(n)$.
+
+
+\subsection{LaMCTS}
+Starting from a start node a start node, a child node is selected and added to the search tree.
+These strategie thus consist of four basic steps, which will be described will be explained in more detail in the following.
+\subsubsection{Selektion}
+With the help of an evaluation function (heuristic), the selection of a node s follows. 
+However, it should be noted that non-preferred nodes should also be considered.
+In some cases, the non-preferred nodes may have a higher value.With the help of an evaluation function (heuristic), the selection of a node s follows. 
+However, it should be noted that non-preferred nodes should also be considered.
+In some cases, the non-preferred nodes may have a higher value.
+
+\subsubsection{Expansion} 
+In this step, the children of the selected node s are considered. 
+If there are one or more children that have not yet been expanded, these children are added to the search tree.
+These children are added to the search tree. 
+However, if all children of the nodes have been expanded, then another or also a child node s is selected and
+the expansion step is then executed on the nodes.
+
+\subsubsection{Simulation} 
+The search policy follows from this step. Here, playouts are executed on the newly added child nodes.
+child nodes that have been added. There are also two options for the playout.
+One chooses purely random moves without knowing the rules of the game.
+One uses a heuristic so that there is less randomness present
+Looking at the last moves, which lets you know beforehand if you missed/achieved the goal).
+In a nutshell, it means that from the newly added child node to a hand
+random moves are chosen.
+
+\subsubsection{Backpropagation}
+Finally, the last step Backpropagation occurs. After a leaf is reached by the simulation, all nodes in the search tree are updated.
+In addition, for each node j traversed, the simulation number nj is incremented by one is increased.
+
+\subsection{LaP3}
+
+The \ac{LaP3} algorithm is an extensions of the LaMCTS. \cite{NEURIPS2021_03a3655f}
+It is a new path planning method which improves the function value estimation within each sub-region.
+This algorithm use a latent representation of the search space.
+\ac{LaP3} and \ac{LaMCTS} use the maximum, instead of the mean, as the node score to improve sample efficiency.
+
+\section{Evaluation}
+
+
+\section{Conclusions and Further Discussion}
+
+
+\clearpage
+
+
+\section*{Acronyms} 
+\addcontentsline{toc}{section}{Acronyms}
+
+\begin{acronym}[....]
+    \acro{LaP3}{Latent Space Partitions for Path Planning}
+    \acro{LaMCTS}{Latent Space Monte Carlo Tree Search}
+\end{acronym}
+
+\bibliographystyle{alpha}
+\bibliography{literature}
+\todo[inline]{Alphabetisch sortieren}
+\end{document}
