@@ -58,7 +58,7 @@ class World:
         goal = (self.target_x, self.target_y)
 
         astar = AStar(self.arr1)
-        path = astar.search(start, goal)
+        path, sample_count = astar.search(start, goal)
 
         # find maximum reward in grid
         max_reward = float("-inf")
@@ -67,6 +67,7 @@ class World:
                 max_reward = max(max_reward, col)
 
         print("Maximum reward:", max_reward)
+        print("Sample Count:", sample_count)
 
         for item in path:
             self.arr1[item[0]][item[1]] = 8

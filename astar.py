@@ -56,6 +56,7 @@ class AStar:
         start = Tile(*start_pos)
         self.open_tiles = set([start])
         self.closed_tiles = set()
+        samples_count = 0
 
         # while we still have tiles to search
         while len(self.open_tiles) > 0:
@@ -63,13 +64,14 @@ class AStar:
             tile = min(self.open_tiles)
             # check if we're there. Happy path!
             if tile.pos == target_pos:
-                return self.rebuild_path(tile)
+                return self.rebuild_path(tile), samples_count
             # search new ways in the neighbor's tiles.
             self.search_for_tiles(tile)
 
             self.close_tile(tile)
+            samples_count += 1
         # if we got here, path is blocked :(
-        return None
+        return None, samples_count
 
     def search_for_tiles(self, current):
         """Search for new tiles in the maze"""
