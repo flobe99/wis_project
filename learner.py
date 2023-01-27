@@ -1,13 +1,13 @@
-import math
-import random
 import numpy as np
 from colorama import Fore, Back, Style
-import time
 import sys
-import pyastar2d
+from astar import AStar
+
+# import pyastar2d
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn import svm
+
 sys.setrecursionlimit(1500000000)
 
 
@@ -20,7 +20,7 @@ class World:
         self.dim_x = 12
         self.dim_y = 12
 
-        self.arr1 = np.zeros([self.dim_x, self.dim_y], dtype=np.float32)
+        self.arr1 = np.zeros([self.dim_x, self.dim_y])
         self.arr2 = np.zeros([self.dim_x, self.dim_y])
 
         self.pos_x = 0
@@ -54,13 +54,19 @@ class World:
         return cost_arr
 
     def a_star(self):
-        cost_arr = self.a_star_cost_array()
         start = (self.pos_x, self.pos_y)
         goal = (self.target_x, self.target_y)
-        path = pyastar2d.astar_path(cost_arr, start, goal, allow_diagonal=True)
 
-        # The path is returned as a numpy array of (i, j) coordinates.
-        # print(f"Shortest path from {start} to {goal} found:")
+        astar = AStar(self.arr1)
+        path = astar.search(start, goal)
+
+        # find maximum reward in grid
+        max_reward = float("-inf")
+        for row in self.arr1:
+            for col in row:
+                max_reward = max(max_reward, col)
+
+        print("Maximum reward:", max_reward)
 
         for item in path:
             self.arr1[item[0]][item[1]] = 8
@@ -143,12 +149,6 @@ class World:
 
 
     def reset_board(self):
-        for i in range(0, self.dim_x):
-            for j in range(0, self.dim_y):
-                self.arr1[i][j] = 0
-        self.arr1[self.pos_x][self.pos_y] = 8
-        self.arr1[self.target_x][self.target_y] = 3
-
         self.arr1[0][5] = 1
         self.arr1[1][5] = 1
         self.arr1[2][5] = 1
@@ -341,22 +341,14 @@ w1 = World()
 # w1.print_board(w1.arr1)
 
 # w1.treesearch_simple(800)
-w1.lamcts()
+# w1.lamcts()
 
-print('board1')
-w1.print_board(w1.arr1)
-w1.treewalk()  # search with random search
-
-# w1.a_star()  # search with AStar
-# print("\nAStar Path")
+# print("board1")
 # w1.print_board(w1.arr1)
+# w1.treewalk()  # search with random search
 
-
-print("")
-print("Arr2")
-print(w1.arr2)
-print("")
-
+w1.a_star()  # search with AStar
+print("\nAStar Path")
 w1.print_board(w1.arr1)
 
 plt.figure(1)
