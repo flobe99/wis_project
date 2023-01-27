@@ -1,3 +1,5 @@
+import random
+import math
 import numpy as np
 from colorama import Fore, Back, Style
 import sys
