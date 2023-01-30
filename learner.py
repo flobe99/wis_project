@@ -1,16 +1,15 @@
-import random
 import math
+import statistics
+import random
 import numpy as np
 from colorama import Fore, Back, Style
+import time
 import sys
-from astar import AStar
-
-# import pyastar2d
+import pyastar2d
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn import svm
-
-sys.setrecursionlimit(1500000000)
+from scipy.spatial import ConvexHull, convex_hull_plot_2d
 
 
 # https://www.geeksforgeeks.org/ml-monte-carlo-tree-search-mcts/
@@ -22,7 +21,7 @@ class World:
         self.dim_x = 12
         self.dim_y = 12
 
-        self.arr1 = np.zeros([self.dim_x, self.dim_y])
+        self.arr1 = np.zeros([self.dim_x, self.dim_y], dtype=np.float32)
         self.arr2 = np.zeros([self.dim_x, self.dim_y])
 
         self.pos_x = 0
@@ -42,10 +41,17 @@ class World:
         self.tree_width = 3
         self.tree_horizon = 1
 
+        self.samples_x = []
+        self.samples_y = []
+
         self.treeleaves = []
+        self.treeleaves2 = []
+        self.treeleaves2_index = 0
 
         self.treeleaves.append({'id':self.leaf_id, 'parent':0, 'parent_action': [0], 'reward': -5, 'position':[self.pos_x, self.pos_y]})
         self.leaf_id = self.leaf_id + 1
+
+        self.treeleaves2.append({'id':self.treeleaves2_index, 'parent':0, 'mean_x':self.dim_x*0.5, 'mean_y':self.dim_y*0.5, 'dst': max(self.dim_x, self.dim_y)*0.5, 'clf':svm.SVC(kernel='linear')})
 
     def a_star_cost_array(self):
         temp_arr = np.copy(self.arr1)
@@ -56,20 +62,13 @@ class World:
         return cost_arr
 
     def a_star(self):
+        cost_arr = self.a_star_cost_array()
         start = (self.pos_x, self.pos_y)
         goal = (self.target_x, self.target_y)
+        path = pyastar2d.astar_path(cost_arr, start, goal, allow_diagonal=True)
 
-        astar = AStar(self.arr1)
-        path, sample_count = astar.search(start, goal)
-
-        # find maximum reward in grid
-        max_reward = float("-inf")
-        for row in self.arr1:
-            for col in row:
-                max_reward = max(max_reward, col)
-
-        print("Maximum reward:", max_reward)
-        print("Sample Count:", sample_count)
+        # The path is returned as a numpy array of (i, j) coordinates.
+        # print(f"Shortest path from {start} to {goal} found:")
 
         for item in path:
             self.arr1[item[0]][item[1]] = 8
@@ -132,10 +131,18 @@ class World:
         try:
             reward2 = 1 / (math.sqrt((x1 - self.target_x) ** 2 + (y1 - self.target_y) ** 2))
         except:
-            reward2 = 100
+            reward2 = 5
         # reward3 = 1 / reward2
         # print(reward2, reward3)
         return reward2*10
+
+
+    def take_samples(self, num_samples):
+        for i1 in range(0, num_samples):
+            rndx = random.randint(0, self.dim_x-1)
+            rndy = random.randint(0, self.dim_y-1)
+            self.samples_x.append([rndx, rndy])
+            self.samples_y.append([self.reward(rndx, rndy)])
 
 
     def search(self):
@@ -152,6 +159,12 @@ class World:
 
 
     def reset_board(self):
+        for i in range(0, self.dim_x):
+            for j in range(0, self.dim_y):
+                self.arr1[i][j] = 0
+        self.arr1[self.pos_x][self.pos_y] = 8
+        self.arr1[self.target_x][self.target_y] = 3
+
         self.arr1[0][5] = 1
         self.arr1[1][5] = 1
         self.arr1[2][5] = 1
@@ -298,12 +311,22 @@ class World:
             self.arr1[self.pos_x][self.pos_y] = 8
 
 
-    def lamcts(self):
+    def lamcts(self, leaf_id):
+        clcx = 0
+        clcy = 0
+        sampling_dst = 0
+        leaf_temp = {}
+        for leaf2 in self.treeleaves2:
+            if leaf2['id'] == leaf_id:
+                clcx = leaf2['mean_x']
+                clcy = leaf2['mean_y']
+                leaf_temp = leaf2
+                sampling_dst = leaf2['dst']
         X1 = []
         y1 = []
         for i1 in range(0, 15):
-            rndx = random.randint(0, self.dim_x-1)
-            rndy = random.randint(0, self.dim_y-1)
+            rndx = random.randint(int(max(0, clcx-sampling_dst)), int(min(self.dim_x-1, clcx+sampling_dst)))
+            rndy = random.randint(int(max(0, clcy-sampling_dst)), int(min(self.dim_y-1, clcy+sampling_dst)))
             if self.arr1[rndx][rndy] != 1:
                 X1.append([rndx, rndy])
                 y1.append([self.reward(rndx, rndy)])
@@ -315,16 +338,62 @@ class World:
         print('kmeans labels')
         labels1 = kmeans.labels_
         print(labels1)
+        print('kmeans centers')
+        centers1 = kmeans.cluster_centers_
+        print(centers1)
+
+        pred_index_good = 5
+        pred_index_bad = 5
+        if centers1[0] < centers1[1]:
+            pred_index_good = 1
+            pred_index_bad = 0
+        else:
+            pred_index_good = 0
+            pred_index_bad = 1
+        
         clf = svm.SVC(kernel='linear')
         clf.fit(X1, labels1)
+        print('clf2', clf.support_vectors_)
+        leaf_temp['clf'] = clf
+
+        lbl_x1 = []
+        lbl_x2 = []
+        lbl_y1 = []
+        lbl_y2 = []
         for i2 in range(0, len(labels1)):
             x2 = X1[i2][0]
             y2 = X1[i2][1]
+            print('x:', x2, 'y:', y2)
             print('label:', labels1[i2])
+            print('')
+            if labels1[i2] == pred_index_bad:
+                lbl_x1.append(x2)
+                lbl_y1.append(y2)
+            if labels1[i2] == pred_index_good:
+                lbl_x2.append(x2)
+                lbl_y2.append(y2)
             # if labels1[i2] == 1:
             #     self.arr1[x2][y2] = 2
             # if labels1[i2] == 0:
             #     self.arr1[x2][y2] = 9
+
+        x_mean1 = round(statistics.mean(lbl_x1), 0)
+        y_mean1 = round(statistics.mean(lbl_y1), 0)
+        x_mean2 = round(statistics.mean(lbl_x2), 0)
+        y_mean2 = round(statistics.mean(lbl_y2), 0)
+
+        distance_mean = math.sqrt((x_mean1-x_mean2)**2 + (y_mean1-y_mean2)**2)
+
+        self.treeleaves2_index = self.treeleaves2_index + 1
+        d1 = {'id':self.treeleaves2_index, 'parent':leaf_id, 'mean_x':x_mean1, 'mean_y':y_mean1, 'dst': distance_mean, 'clf':svm.SVC(kernel='linear')}
+        self.treeleaves2_index = self.treeleaves2_index + 1
+        d2 = {'id':self.treeleaves2_index, 'parent':leaf_id, 'mean_x':x_mean2, 'mean_y':y_mean2, 'dst': distance_mean, 'clf':svm.SVC(kernel='linear')}
+        self.treeleaves2.append(d1)
+        self.treeleaves2.append(d2)
+        if self.treeleaves2_index < 3:
+            self.lamcts(d1['id'])
+            self.lamcts(d2['id'])
+
         for i3 in range(0, self.dim_x):
             for j3 in range(0, self.dim_y):
                 if self.arr1[i3][j3] != 1:
@@ -336,6 +405,218 @@ class World:
         # print('prediction', clf.predict([[3, 10]]))
 
 
+    def plot_lamcts(self):
+        plt.figure(1)
+        plt.grid()
+        plt.plot([-0.5, self.dim_x-0.5, self.dim_x-0.5, -0.5, -0.5], [0.5, 0.5, self.dim_y*-1+0.5, self.dim_y*-1+0.5, 0.5], color='black')
+        for i in range(0, self.dim_x):
+            for j in range(0, self.dim_y):
+                if self.arr1[i][j] == 1:
+                    plt.scatter(j, -i, color='black', marker='s')
+        for treeleaf in self.treeleaves:
+            plt.scatter(treeleaf['position'][1], treeleaf['position'][0]*-1, color='black', s=100, alpha=0.20)
+            for leaf2 in self.treeleaves:
+                if leaf2['id'] == treeleaf['parent']:
+                    pos2x = leaf2['position'][0]
+                    pos2y = leaf2['position'][1]
+                    plt.plot([treeleaf['position'][1], pos2y], [treeleaf['position'][0]*-1, pos2x*-1], color='blue', linestyle='dashed')
+        for treeleaf2 in self.treeleaves2:
+            print(treeleaf2)
+            color1='black'
+            try:
+                print(treeleaf2['clf'].support_vectors_)
+                color1='green'
+            except:
+                pass
+            print('')
+            # plt.scatter(treeleaf2['mean_x'], -treeleaf2['mean_y'], color=color1, marker='^')
+            # plt.text(treeleaf2['mean_x'], -treeleaf2['mean_y'], treeleaf2['id'])
+        clf3 = self.treeleaves2[0]['clf']
+        clf4 = self.treeleaves2[2]['clf']
+
+        points1 = []
+        points2 = []
+
+        for i4 in range(0, self.dim_x):
+            for j4 in range(0, self.dim_y):
+                if w1.arr1[i4][j4] != 1:
+                    test4 = clf3.predict([[i4, j4]])
+                    test5 = clf4.predict([[i4, j4]])
+                    if test4 == 1:
+                        # plt.scatter(j4, i4*-1, color='blue', s=100, alpha=0.5)
+                        points1.append([i4*-1, j4])
+                    else:
+                        # plt.scatter(j4, i4*-1, color='red', s=100, alpha=0.5)
+                        points2.append([i4*-1, j4])
+
+        hull1 = ConvexHull(points1)
+        hull2 = ConvexHull(points2)
+
+        for simplex in hull1.simplices:
+            plt.plot(np.array(points1)[simplex, 1], np.array(points1)[simplex, 0], color='blue', linestyle='dotted')
+        for simplex2 in hull2.simplices:
+            plt.plot(np.array(points2)[simplex2, 1], np.array(points2)[simplex2, 0], color='red', linestyle='dotted')
+
+        plt.scatter(self.treeleaves2[1]['mean_x'], self.treeleaves2[1]['mean_y']*-1)
+        plt.scatter(self.treeleaves2[2]['mean_x'], self.treeleaves2[2]['mean_y']*-1)
+
+        plt.show()
+
+
+    def lap3(self, leaf_id, samples_xvec, samplex_yvec):
+        clcx = 0
+        clcy = 0
+        sampling_dst = 0
+        leaf_temp = {}
+        for leaf2 in self.treeleaves2:
+            if leaf2['id'] == leaf_id:
+                clcx = leaf2['mean_x']
+                clcy = leaf2['mean_y']
+                leaf_temp = leaf2
+                sampling_dst = leaf2['dst']
+        X1 = []
+        y1 = []
+        for i1 in range(0, 15):
+            rndx = random.randint(int(max(0, clcx-sampling_dst)), int(min(self.dim_x-1, clcx+sampling_dst)))
+            rndy = random.randint(int(max(0, clcy-sampling_dst)), int(min(self.dim_y-1, clcy+sampling_dst)))
+            if self.arr1[rndx][rndy] != 1:
+                self.samples_x.append([rndx, rndy])
+                self.samples_y.append([self.reward(rndx, rndy)])
+                X1.append([rndx, rndy])
+                y1.append([self.reward(rndx, rndy)])
+            else:
+                i1 = i1 - 1
+        print('X1', X1)
+        print('y1', y1)
+        kmeans = KMeans(n_clusters=2, random_state=0).fit(y1)
+        print('kmeans labels')
+        labels1 = kmeans.labels_
+        print(labels1)
+        print('kmeans centers')
+        centers1 = kmeans.cluster_centers_
+        print(centers1)
+
+        pred_index_good = 5
+        pred_index_bad = 5
+        if centers1[0] < centers1[1]:
+            pred_index_good = 1
+            pred_index_bad = 0
+        else:
+            pred_index_good = 0
+            pred_index_bad = 1
+        
+        clf = svm.SVC(kernel='linear')
+        clf.fit(X1, labels1)
+        print('clf2', clf.support_vectors_)
+        leaf_temp['clf'] = clf
+
+        lbl_x1 = []
+        lbl_x2 = []
+        lbl_y1 = []
+        lbl_y2 = []
+        for i2 in range(0, len(labels1)):
+            x2 = X1[i2][0]
+            y2 = X1[i2][1]
+            print('x:', x2, 'y:', y2)
+            print('label:', labels1[i2])
+            print('')
+            if labels1[i2] == pred_index_bad:
+                lbl_x1.append(x2)
+                lbl_y1.append(y2)
+            if labels1[i2] == pred_index_good:
+                lbl_x2.append(x2)
+                lbl_y2.append(y2)
+            # if labels1[i2] == 1:
+            #     self.arr1[x2][y2] = 2
+            # if labels1[i2] == 0:
+            #     self.arr1[x2][y2] = 9
+
+        x_mean1 = round(statistics.mean(lbl_x1), 0)
+        y_mean1 = round(statistics.mean(lbl_y1), 0)
+        x_mean2 = round(statistics.mean(lbl_x2), 0)
+        y_mean2 = round(statistics.mean(lbl_y2), 0)
+
+        distance_mean = math.sqrt((x_mean1-x_mean2)**2 + (y_mean1-y_mean2)**2)
+
+        self.treeleaves2_index = self.treeleaves2_index + 1
+        d1 = {'id':self.treeleaves2_index, 'parent':leaf_id, 'mean_x':x_mean1, 'mean_y':y_mean1, 'dst': distance_mean, 'clf':svm.SVC(kernel='linear')}
+        self.treeleaves2_index = self.treeleaves2_index + 1
+        d2 = {'id':self.treeleaves2_index, 'parent':leaf_id, 'mean_x':x_mean2, 'mean_y':y_mean2, 'dst': distance_mean, 'clf':svm.SVC(kernel='linear')}
+        self.treeleaves2.append(d1)
+        self.treeleaves2.append(d2)
+        if self.treeleaves2_index < 3:
+            self.lamcts(d1['id'])
+            self.lamcts(d2['id'])
+
+        for i3 in range(0, self.dim_x):
+            for j3 in range(0, self.dim_y):
+                if self.arr1[i3][j3] != 1:
+                    pred = clf.predict([[i3, j3]])
+                    if pred[0] == 0:
+                        self.arr1[i3][j3] = 9
+                    if pred[0] == 1:
+                        self.arr1[i3][j3] = 2
+        # print('prediction', clf.predict([[3, 10]]))
+
+
+    def plot_lap3(self):
+        plt.figure(1)
+        plt.grid()
+        plt.plot([-0.5, self.dim_x-0.5, self.dim_x-0.5, -0.5, -0.5], [0.5, 0.5, self.dim_y*-1+0.5, self.dim_y*-1+0.5, 0.5], color='black')
+        for i in range(0, self.dim_x):
+            for j in range(0, self.dim_y):
+                if self.arr1[i][j] == 1:
+                    plt.scatter(j, -i, color='black', marker='s')
+        for treeleaf in self.treeleaves:
+            plt.scatter(treeleaf['position'][1], treeleaf['position'][0]*-1, color='black', s=100, alpha=0.20)
+            for leaf2 in self.treeleaves:
+                if leaf2['id'] == treeleaf['parent']:
+                    pos2x = leaf2['position'][0]
+                    pos2y = leaf2['position'][1]
+                    plt.plot([treeleaf['position'][1], pos2y], [treeleaf['position'][0]*-1, pos2x*-1], color='blue', linestyle='dashed')
+        for treeleaf2 in self.treeleaves2:
+            print(treeleaf2)
+            color1='black'
+            try:
+                print(treeleaf2['clf'].support_vectors_)
+                color1='green'
+            except:
+                pass
+            print('')
+            # plt.scatter(treeleaf2['mean_x'], -treeleaf2['mean_y'], color=color1, marker='^')
+            # plt.text(treeleaf2['mean_x'], -treeleaf2['mean_y'], treeleaf2['id'])
+        clf3 = self.treeleaves2[0]['clf']
+        clf4 = self.treeleaves2[2]['clf']
+
+        points1 = []
+        points2 = []
+
+        for i4 in range(0, self.dim_x):
+            for j4 in range(0, self.dim_y):
+                if w1.arr1[i4][j4] != 1:
+                    test4 = clf3.predict([[i4, j4]])
+                    test5 = clf4.predict([[i4, j4]])
+                    if test4 == 1:
+                        # plt.scatter(j4, i4*-1, color='blue', s=100, alpha=0.5)
+                        points1.append([i4*-1, j4])
+                    else:
+                        # plt.scatter(j4, i4*-1, color='red', s=100, alpha=0.5)
+                        points2.append([i4*-1, j4])
+
+        hull1 = ConvexHull(points1)
+        hull2 = ConvexHull(points2)
+
+        for simplex in hull1.simplices:
+            plt.plot(np.array(points1)[simplex, 1], np.array(points1)[simplex, 0], color='blue', linestyle='dotted')
+        for simplex2 in hull2.simplices:
+            plt.plot(np.array(points2)[simplex2, 1], np.array(points2)[simplex2, 0], color='red', linestyle='dotted')
+
+        plt.scatter(self.treeleaves2[1]['mean_x'], self.treeleaves2[1]['mean_y']*-1)
+        plt.scatter(self.treeleaves2[2]['mean_x'], self.treeleaves2[2]['mean_y']*-1)
+
+        plt.show()
+
+
 
 w1 = World()
 
@@ -344,30 +625,22 @@ w1 = World()
 # w1.print_board(w1.arr1)
 
 # w1.treesearch_simple(800)
-# w1.lamcts()
+w1.take_samples(15)
+w1.lamcts(0)
 
-# print("board1")
-# w1.print_board(w1.arr1)
-# w1.treewalk()  # search with random search
-
-w1.a_star()  # search with AStar
-print("\nAStar Path")
+print('board1')
 w1.print_board(w1.arr1)
+w1.treewalk()  # search with random search
 
-plt.figure(1)
-plt.grid()
-for i in range(0, w1.dim_x):
-    for j in range(0, w1.dim_y):
-        if w1.arr1[i][j] == 1:
-            plt.scatter(j, -i, color='red', marker='s')
-for treeleaf in w1.treeleaves:
-    plt.scatter(treeleaf['position'][1], treeleaf['position'][0]*-1, color='black', s=100, alpha=0.20)
-    for leaf2 in w1.treeleaves:
-        if leaf2['id'] == treeleaf['parent']:
-            pos2x = leaf2['position'][0]
-            pos2y = leaf2['position'][1]
-            plt.plot([treeleaf['position'][1], pos2y], [treeleaf['position'][0]*-1, pos2x*-1], color='blue', linestyle='dashed')
-# plt.plot([0, 1], [1, 1])
-plt.show()
+# w1.a_star()  # search with AStar
+# print("\nAStar Path")
+# w1.print_board(w1.arr1)
 
-# print(w1.treeleaves)
+
+print("")
+print("Arr2")
+print(w1.arr2)
+print("")
+
+w1.print_board(w1.arr1)
+w1.plot_lamcts()
