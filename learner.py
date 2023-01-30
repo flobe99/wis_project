@@ -5,7 +5,8 @@ import numpy as np
 from colorama import Fore, Back, Style
 import time
 import sys
-import pyastar2d
+
+from astar import AStar
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn import svm
@@ -62,13 +63,20 @@ class World:
         return cost_arr
 
     def a_star(self):
-        cost_arr = self.a_star_cost_array()
         start = (self.pos_x, self.pos_y)
         goal = (self.target_x, self.target_y)
-        path = pyastar2d.astar_path(cost_arr, start, goal, allow_diagonal=True)
 
-        # The path is returned as a numpy array of (i, j) coordinates.
-        # print(f"Shortest path from {start} to {goal} found:")
+        astar = AStar(self.arr1)
+        path, sample_count = astar.search(start, goal)
+
+        # find maximum reward in grid
+        max_reward = float("-inf")
+        for row in self.arr1:
+            for col in row:
+                max_reward = max(max_reward, col)
+
+        print("Maximum reward:", max_reward)
+        print("Sample Count:", sample_count)
 
         for item in path:
             self.arr1[item[0]][item[1]] = 8
