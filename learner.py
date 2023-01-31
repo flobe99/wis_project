@@ -168,9 +168,6 @@ class World:
 
     def reset_board(self):
 
-        self.arr1 = np.zeros([self.dim_x, self.dim_y])
-        self.arr2 = np.zeros([self.dim_x, self.dim_y])
-
         self.arr1[0][5] = 1
         self.arr1[1][5] = 1
         self.arr1[2][5] = 1
