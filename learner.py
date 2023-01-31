@@ -337,8 +337,8 @@ class World:
                 i1 = i1 - 1
         print('X1', X1)
         print('y1', y1)
-        kmeans = KMeans(n_clusters=2, random_state=0).fit(y1)
         print('kmeans labels')
+        kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(y1)
         labels1 = kmeans.labels_
         print(labels1)
         print('kmeans centers')
@@ -491,8 +491,8 @@ class World:
                 i1 = i1 - 1
         print('X1', X1)
         print('y1', y1)
-        kmeans = KMeans(n_clusters=2, random_state=0).fit(y1)
         print('kmeans labels')
+        kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(y1)
         labels1 = kmeans.labels_
         print(labels1)
         print('kmeans centers')
