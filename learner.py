@@ -442,7 +442,7 @@ class World:
 
         for i4 in range(0, self.dim_x):
             for j4 in range(0, self.dim_y):
-                if w1.arr1[i4][j4] != 1:
+                if self.arr1[i4][j4] != 1:
                     test4 = clf3.predict([[i4, j4]])
                     test5 = clf4.predict([[i4, j4]])
                     if test4 == 1:
