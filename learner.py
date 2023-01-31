@@ -167,11 +167,6 @@ class World:
 
 
     def reset_board(self):
-        for i in range(0, self.dim_x):
-            for j in range(0, self.dim_y):
-                self.arr1[i][j] = 0
-        self.arr1[self.pos_x][self.pos_y] = 8
-        self.arr1[self.target_x][self.target_y] = 3
 
         self.arr1[0][5] = 1
         self.arr1[1][5] = 1
