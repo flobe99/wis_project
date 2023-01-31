@@ -22,7 +22,7 @@ class World:
         self.dim_x = 12
         self.dim_y = 12
 
-        self.arr1 = np.zeros([self.dim_x, self.dim_y], dtype=np.float32)
+        self.arr1 = np.zeros([self.dim_x, self.dim_y])
         self.arr2 = np.zeros([self.dim_x, self.dim_y])
 
         self.pos_x = 0
