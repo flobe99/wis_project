@@ -638,9 +638,10 @@ print('board1')
 w1.print_board(w1.arr1)
 w1.treewalk()  # search with random search
 
-# w1.a_star()  # search with AStar
-# print("\nAStar Path")
-# w1.print_board(w1.arr1)
+w1.reset_board()
+w1.a_star()  # search with AStar
+print("\nAStar Path")
+w1.print_board(w1.arr1)
 
 
 print("")
