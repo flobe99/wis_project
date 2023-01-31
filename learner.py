@@ -620,31 +620,47 @@ class World:
         plt.show()
 
 
-
-w1 = World()
-
-# print(print(w1.arr1))
-# print("\nStart Grid")
-# w1.print_board(w1.arr1)
-
-# w1.treesearch_simple(800)
-w1.take_samples(15)
-w1.lamcts(0)
-
-print('board1')
-w1.print_board(w1.arr1)
-w1.treewalk()  # search with random search
-
-w1.reset_board()
-w1.a_star()  # search with AStar
-print("\nAStar Path")
-w1.print_board(w1.arr1)
+def execute_astar():
+    print("execute astar")
+    w1_astar = World()
+    w1_astar.a_star()  # search with AStar
+    print("\nAStar Path")
+    w1_astar.print_board(w1_astar.arr1)
 
 
-print("")
-print("Arr2")
-print(w1.arr2)
-print("")
+def execute_mcts():
+    print("execute mcts")
+    # print(print(w1_mcts.arr1))
+    # print("\nStart Grid")
+    # w1_mcts.print_board(w1_mcts.arr1)
 
-w1.print_board(w1.arr1)
-w1.plot_lamcts()
+    # w1_mcts.treesearch_simple(800)
+    w1_mcts = World()
+    w1_mcts.take_samples(15)
+    w1_mcts.lamcts(0)
+
+    print("board1")
+    w1_mcts.print_board(w1_mcts.arr1)
+    w1_mcts.treewalk()  # search with random search
+
+    print("")
+    print("Arr2")
+    print(w1_mcts.arr2)
+    print("")
+
+    w1_mcts.print_board(w1_mcts.arr1)
+    w1_mcts.plot_lamcts()
+
+
+def execute_lap3():
+    w1_lap3 = World()
+
+
+def main():
+    execute_astar()
+    execute_mcts()
+    execute_lap3()
+
+
+if __name__ == "__main__":
+    main()
