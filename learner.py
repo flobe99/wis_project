@@ -34,7 +34,6 @@ class World:
         self.reset_board()
 
         self.directions = [[0, 0], [0, 1], [0, -1], [1, 0], [1, 1], [1, -1], [-1, 0], [-1, 1], [-1, -1]]
-        # self.directions = [[0, 1], [0, -1], [1, 0], [1, 1], [1, -1], [-1, 0], [-1, 1], [-1, -1]]
 
         self.possible_directions = []
 
