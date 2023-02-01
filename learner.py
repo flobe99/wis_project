@@ -48,10 +48,21 @@ class World:
         self.treeleaves2 = []
         self.treeleaves2_index = 0
 
-        self.treeleaves.append({'id':self.leaf_id, 'parent':0, 'parent_action': [0], 'reward': -5, 'position':[self.pos_x, self.pos_y]})
+        self.treeleaves.append(
+            {"id": self.leaf_id, "parent": 0, "parent_action": [0], "reward": -5, "position": [self.pos_x, self.pos_y]}
+        )
         self.leaf_id = self.leaf_id + 1
 
-        self.treeleaves2.append({'id':self.treeleaves2_index, 'parent':0, 'mean_x':self.dim_x*0.5, 'mean_y':self.dim_y*0.5, 'dst': max(self.dim_x, self.dim_y)*0.5, 'clf':svm.SVC(kernel='linear')})
+        self.treeleaves2.append(
+            {
+                "id": self.treeleaves2_index,
+                "parent": 0,
+                "mean_x": self.dim_x * 0.5,
+                "mean_y": self.dim_y * 0.5,
+                "dst": max(self.dim_x, self.dim_y) * 0.5,
+                "clf": svm.SVC(kernel="linear"),
+            }
+        )
 
     def a_star_cost_array(self):
         temp_arr = np.copy(self.arr1)
@@ -98,7 +109,7 @@ class World:
     def move_predict(self):
         reward_max = 0
         direction_max = []
-        print('choosing max pos, current pos', self.pos_x, self.pos_y)
+        print("choosing max pos, current pos", self.pos_x, self.pos_y)
         for i1 in self.possible_directions:
             direction = self.directions[i1]
             ftr_x = self.pos_x + direction[0]
@@ -111,8 +122,8 @@ class World:
                 reward_max = r1
                 direction_max = direction
 
-        print('direction chosen', direction_max)
-        print('')
+        print("direction chosen", direction_max)
+        print("")
         self.pos_x = self.pos_x + direction_max[0]
         self.pos_y = self.pos_y + direction_max[1]
         self.arr1[self.pos_x][self.pos_y] = 8
@@ -121,16 +132,15 @@ class World:
     def move_explore(self):
         rnd1 = random.randint(0, len(self.possible_directions))
         index_dir = self.possible_directions[rnd1]
-        print('chosing rnd pos, current pos', self.pos_x, self.pos_y)
+        print("chosing rnd pos, current pos", self.pos_x, self.pos_y)
         direction = self.directions[index_dir]
-        print('direction chosen', direction)
+        print("direction chosen", direction)
         ftr_x = self.pos_x + direction[0]
         ftr_y = self.pos_y + direction[1]
         self.pos_x = self.pos_x + direction[0]
         self.pos_y = self.pos_y + direction[1]
         self.arr1[self.pos_x][self.pos_y] = 8
         # self.arr2[ftr_x][ftr_y] = reward_max
-
 
     def reward(self, x1, y1):
         # print('reward', x1, y1)
@@ -141,16 +151,14 @@ class World:
             reward2 = 5
         # reward3 = 1 / reward2
         # print(reward2, reward3)
-        return reward2*10
-
+        return reward2 * 10
 
     def take_samples(self, num_samples):
         for i1 in range(0, num_samples):
-            rndx = random.randint(0, self.dim_x-1)
-            rndy = random.randint(0, self.dim_y-1)
+            rndx = random.randint(0, self.dim_x - 1)
+            rndy = random.randint(0, self.dim_y - 1)
             self.samples_x.append([rndx, rndy])
             self.samples_y.append([self.reward(rndx, rndy)])
-
 
     def search(self):
         for i in range(0, 1):
@@ -163,7 +171,6 @@ class World:
             else:
                 self.move_predict()
             self.print_board(self.arr1)
-
 
     def reset_board(self):
 
@@ -184,7 +191,6 @@ class World:
         self.arr1[5][8] = 1
         self.arr1[4][8] = 1
 
-
     def print_board(self, board):
         for row in board:
             for cell in row:
@@ -201,44 +207,41 @@ class World:
 
             print()
 
-
     def treesearch_simple(self, hm_loops):
         for i in range(0, hm_loops):
-            print('treesearch', i)
+            print("treesearch", i)
             self.tree_select(1)
 
-
     def tree_select(self, leaf_id):
-        print('tree_select', leaf_id)
+        print("tree_select", leaf_id)
         leaves_arr = []
         reward_temp = -5
         index_temp = 0
 
         for leaf1 in self.treeleaves:
-            if leaf1['parent'] == leaf_id:
-                leaves_arr.append(leaf1['id'])
-                if leaf1['reward'] > reward_temp:
-                    index_temp = leaf1['id']
-                    reward_temp = leaf1['reward']
-        print('treeleaves', leaves_arr)
+            if leaf1["parent"] == leaf_id:
+                leaves_arr.append(leaf1["id"])
+                if leaf1["reward"] > reward_temp:
+                    index_temp = leaf1["id"]
+                    reward_temp = leaf1["reward"]
+        print("treeleaves", leaves_arr)
 
         if len(leaves_arr) <= 0:
-            print('tr exp')
+            print("tr exp")
             self.tree_expand(leaf_id)
         else:
             rnd1 = random.random()
             # rnd1 = 0.8130436593743464
             if rnd1 < self.epsilon:
-                rnd2 = random.randint(0, len(leaves_arr)-1)
-                print('rnd sel', rnd2)
+                rnd2 = random.randint(0, len(leaves_arr) - 1)
+                print("rnd sel", rnd2)
                 self.tree_select(leaves_arr[rnd2])
             else:
-                print('rew sel')
+                print("rew sel")
                 self.tree_select(index_temp)
 
-
     def tree_expand(self, leaf_id):
-        print('tree_expand')
+        print("tree_expand")
         arr1 = self.tree_sim(leaf_id)
         leaves_add = min(len(arr1), self.tree_width)
         print(self.directions)
@@ -248,7 +251,15 @@ class World:
             ftr_x = self.pos_x + self.directions[direction1][0]
             ftr_y = self.pos_y + self.directions[direction1][1]
             if self.arr1[ftr_x][ftr_y] != 2:
-                self.treeleaves.append({'id':self.leaf_id, 'parent':leaf_id, 'parent_action': [arr1[i][1]], 'reward': arr1[i][0], 'position':[ftr_x, ftr_y]})
+                self.treeleaves.append(
+                    {
+                        "id": self.leaf_id,
+                        "parent": leaf_id,
+                        "parent_action": [arr1[i][1]],
+                        "reward": arr1[i][0],
+                        "position": [ftr_x, ftr_y],
+                    }
+                )
                 self.leaf_id = self.leaf_id + 1
                 self.arr1[ftr_x][ftr_y] = 2
         # print('treeleaves')
@@ -256,13 +267,12 @@ class World:
         #     print(treeleaf)
         # print('')
 
-
     def tree_sim(self, leaf_id):
-        print('tree_sim')
+        print("tree_sim")
         list1 = []
         for leaf1 in self.treeleaves:
-            if leaf1['id'] == leaf_id:
-                arr_pos = leaf1['position']
+            if leaf1["id"] == leaf_id:
+                arr_pos = leaf1["position"]
                 self.pos_x = arr_pos[0]
                 self.pos_y = arr_pos[1]
         self.get_directions()
@@ -280,38 +290,34 @@ class World:
         # print(list1)
         return list1
 
-
     def tree_backprop(self, leaf_id):
         pass
 
-
     def treesearch_partition(self):
         self.sample()
-
 
     def treewalk(self):
         reward_temp = -5
         id_temp = 0
         dir_list = []
         for leaf1 in self.treeleaves:
-            if leaf1['reward'] > reward_temp:
-                reward_temp = leaf1['reward']
-                id_temp = leaf1['id']
+            if leaf1["reward"] > reward_temp:
+                reward_temp = leaf1["reward"]
+                id_temp = leaf1["id"]
 
-        while(id_temp != 0):
+        while id_temp != 0:
             for leaf2 in self.treeleaves:
-                if leaf2['id'] == id_temp:
-                    id_temp = leaf2['parent']
-                    dir_list = leaf2['parent_action'] + dir_list
-        print('dirlist')
+                if leaf2["id"] == id_temp:
+                    id_temp = leaf2["parent"]
+                    dir_list = leaf2["parent_action"] + dir_list
+        print("dirlist")
         print(dir_list)
-        self.pos_x = self.treeleaves[0]['position'][0]
-        self.pos_y = self.treeleaves[0]['position'][1]
+        self.pos_x = self.treeleaves[0]["position"][0]
+        self.pos_y = self.treeleaves[0]["position"][1]
         for dir1 in dir_list:
             self.pos_x = self.pos_x + self.directions[dir1][0]
             self.pos_y = self.pos_y + self.directions[dir1][1]
             self.arr1[self.pos_x][self.pos_y] = 8
-
 
     def lamcts(self, leaf_id):
         clcx = 0
@@ -319,28 +325,28 @@ class World:
         sampling_dst = 0
         leaf_temp = {}
         for leaf2 in self.treeleaves2:
-            if leaf2['id'] == leaf_id:
-                clcx = leaf2['mean_x']
-                clcy = leaf2['mean_y']
+            if leaf2["id"] == leaf_id:
+                clcx = leaf2["mean_x"]
+                clcy = leaf2["mean_y"]
                 leaf_temp = leaf2
-                sampling_dst = leaf2['dst']
+                sampling_dst = leaf2["dst"]
         X1 = []
         y1 = []
         for i1 in range(0, 15):
-            rndx = random.randint(int(max(0, clcx-sampling_dst)), int(min(self.dim_x-1, clcx+sampling_dst)))
-            rndy = random.randint(int(max(0, clcy-sampling_dst)), int(min(self.dim_y-1, clcy+sampling_dst)))
+            rndx = random.randint(int(max(0, clcx - sampling_dst)), int(min(self.dim_x - 1, clcx + sampling_dst)))
+            rndy = random.randint(int(max(0, clcy - sampling_dst)), int(min(self.dim_y - 1, clcy + sampling_dst)))
             if self.arr1[rndx][rndy] != 1:
                 X1.append([rndx, rndy])
                 y1.append([self.reward(rndx, rndy)])
             else:
                 i1 = i1 - 1
-        print('X1', X1)
-        print('y1', y1)
-        print('kmeans labels')
+        print("X1", X1)
+        print("y1", y1)
+        print("kmeans labels")
         kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(y1)
         labels1 = kmeans.labels_
         print(labels1)
-        print('kmeans centers')
+        print("kmeans centers")
         centers1 = kmeans.cluster_centers_
         print(centers1)
 
@@ -352,11 +358,11 @@ class World:
         else:
             pred_index_good = 0
             pred_index_bad = 1
-        
-        clf = svm.SVC(kernel='linear')
+
+        clf = svm.SVC(kernel="linear")
         clf.fit(X1, labels1)
-        print('clf2', clf.support_vectors_)
-        leaf_temp['clf'] = clf
+        print("clf2", clf.support_vectors_)
+        leaf_temp["clf"] = clf
 
         lbl_x1 = []
         lbl_x2 = []
@@ -365,9 +371,9 @@ class World:
         for i2 in range(0, len(labels1)):
             x2 = X1[i2][0]
             y2 = X1[i2][1]
-            print('x:', x2, 'y:', y2)
-            print('label:', labels1[i2])
-            print('')
+            print("x:", x2, "y:", y2)
+            print("label:", labels1[i2])
+            print("")
             if labels1[i2] == pred_index_bad:
                 lbl_x1.append(x2)
                 lbl_y1.append(y2)
@@ -384,17 +390,31 @@ class World:
         x_mean2 = round(statistics.mean(lbl_x2), 0)
         y_mean2 = round(statistics.mean(lbl_y2), 0)
 
-        distance_mean = math.sqrt((x_mean1-x_mean2)**2 + (y_mean1-y_mean2)**2)
+        distance_mean = math.sqrt((x_mean1 - x_mean2) ** 2 + (y_mean1 - y_mean2) ** 2)
 
         self.treeleaves2_index = self.treeleaves2_index + 1
-        d1 = {'id':self.treeleaves2_index, 'parent':leaf_id, 'mean_x':x_mean1, 'mean_y':y_mean1, 'dst': distance_mean, 'clf':svm.SVC(kernel='linear')}
+        d1 = {
+            "id": self.treeleaves2_index,
+            "parent": leaf_id,
+            "mean_x": x_mean1,
+            "mean_y": y_mean1,
+            "dst": distance_mean,
+            "clf": svm.SVC(kernel="linear"),
+        }
         self.treeleaves2_index = self.treeleaves2_index + 1
-        d2 = {'id':self.treeleaves2_index, 'parent':leaf_id, 'mean_x':x_mean2, 'mean_y':y_mean2, 'dst': distance_mean, 'clf':svm.SVC(kernel='linear')}
+        d2 = {
+            "id": self.treeleaves2_index,
+            "parent": leaf_id,
+            "mean_x": x_mean2,
+            "mean_y": y_mean2,
+            "dst": distance_mean,
+            "clf": svm.SVC(kernel="linear"),
+        }
         self.treeleaves2.append(d1)
         self.treeleaves2.append(d2)
         if self.treeleaves2_index < 3:
-            self.lamcts(d1['id'])
-            self.lamcts(d2['id'])
+            self.lamcts(d1["id"])
+            self.lamcts(d2["id"])
 
         for i3 in range(0, self.dim_x):
             for j3 in range(0, self.dim_y):
@@ -406,35 +426,43 @@ class World:
                         self.arr1[i3][j3] = 2
         # print('prediction', clf.predict([[3, 10]]))
 
-
     def plot_lamcts(self):
         plt.figure(1)
         plt.grid()
-        plt.plot([-0.5, self.dim_x-0.5, self.dim_x-0.5, -0.5, -0.5], [0.5, 0.5, self.dim_y*-1+0.5, self.dim_y*-1+0.5, 0.5], color='black')
+        plt.plot(
+            [-0.5, self.dim_x - 0.5, self.dim_x - 0.5, -0.5, -0.5],
+            [0.5, 0.5, self.dim_y * -1 + 0.5, self.dim_y * -1 + 0.5, 0.5],
+            color="black",
+        )
         for i in range(0, self.dim_x):
             for j in range(0, self.dim_y):
                 if self.arr1[i][j] == 1:
-                    plt.scatter(j, -i, color='black', marker='s')
+                    plt.scatter(j, -i, color="black", marker="s")
         for treeleaf in self.treeleaves:
-            plt.scatter(treeleaf['position'][1], treeleaf['position'][0]*-1, color='black', s=100, alpha=0.20)
+            plt.scatter(treeleaf["position"][1], treeleaf["position"][0] * -1, color="black", s=100, alpha=0.20)
             for leaf2 in self.treeleaves:
-                if leaf2['id'] == treeleaf['parent']:
-                    pos2x = leaf2['position'][0]
-                    pos2y = leaf2['position'][1]
-                    plt.plot([treeleaf['position'][1], pos2y], [treeleaf['position'][0]*-1, pos2x*-1], color='blue', linestyle='dashed')
+                if leaf2["id"] == treeleaf["parent"]:
+                    pos2x = leaf2["position"][0]
+                    pos2y = leaf2["position"][1]
+                    plt.plot(
+                        [treeleaf["position"][1], pos2y],
+                        [treeleaf["position"][0] * -1, pos2x * -1],
+                        color="blue",
+                        linestyle="dashed",
+                    )
         for treeleaf2 in self.treeleaves2:
             print(treeleaf2)
-            color1='black'
+            color1 = "black"
             try:
-                print(treeleaf2['clf'].support_vectors_)
-                color1='green'
+                print(treeleaf2["clf"].support_vectors_)
+                color1 = "green"
             except:
                 pass
-            print('')
+            print("")
             # plt.scatter(treeleaf2['mean_x'], -treeleaf2['mean_y'], color=color1, marker='^')
             # plt.text(treeleaf2['mean_x'], -treeleaf2['mean_y'], treeleaf2['id'])
-        clf3 = self.treeleaves2[0]['clf']
-        clf4 = self.treeleaves2[2]['clf']
+        clf3 = self.treeleaves2[0]["clf"]
+        clf4 = self.treeleaves2[2]["clf"]
 
         points1 = []
         points2 = []
@@ -446,24 +474,23 @@ class World:
                     test5 = clf4.predict([[i4, j4]])
                     if test4 == 1:
                         # plt.scatter(j4, i4*-1, color='blue', s=100, alpha=0.5)
-                        points1.append([i4*-1, j4])
+                        points1.append([i4 * -1, j4])
                     else:
                         # plt.scatter(j4, i4*-1, color='red', s=100, alpha=0.5)
-                        points2.append([i4*-1, j4])
+                        points2.append([i4 * -1, j4])
 
         hull1 = ConvexHull(points1)
         hull2 = ConvexHull(points2)
 
         for simplex in hull1.simplices:
-            plt.plot(np.array(points1)[simplex, 1], np.array(points1)[simplex, 0], color='blue', linestyle='dotted')
+            plt.plot(np.array(points1)[simplex, 1], np.array(points1)[simplex, 0], color="blue", linestyle="dotted")
         for simplex2 in hull2.simplices:
-            plt.plot(np.array(points2)[simplex2, 1], np.array(points2)[simplex2, 0], color='red', linestyle='dotted')
+            plt.plot(np.array(points2)[simplex2, 1], np.array(points2)[simplex2, 0], color="red", linestyle="dotted")
 
-        plt.scatter(self.treeleaves2[1]['mean_x'], self.treeleaves2[1]['mean_y']*-1)
-        plt.scatter(self.treeleaves2[2]['mean_x'], self.treeleaves2[2]['mean_y']*-1)
+        plt.scatter(self.treeleaves2[1]["mean_x"], self.treeleaves2[1]["mean_y"] * -1)
+        plt.scatter(self.treeleaves2[2]["mean_x"], self.treeleaves2[2]["mean_y"] * -1)
 
         plt.show()
-
 
     def lap3(self, leaf_id, samples_xvec, samplex_yvec):
         clcx = 0
@@ -471,16 +498,16 @@ class World:
         sampling_dst = 0
         leaf_temp = {}
         for leaf2 in self.treeleaves2:
-            if leaf2['id'] == leaf_id:
-                clcx = leaf2['mean_x']
-                clcy = leaf2['mean_y']
+            if leaf2["id"] == leaf_id:
+                clcx = leaf2["mean_x"]
+                clcy = leaf2["mean_y"]
                 leaf_temp = leaf2
-                sampling_dst = leaf2['dst']
+                sampling_dst = leaf2["dst"]
         X1 = []
         y1 = []
         for i1 in range(0, 15):
-            rndx = random.randint(int(max(0, clcx-sampling_dst)), int(min(self.dim_x-1, clcx+sampling_dst)))
-            rndy = random.randint(int(max(0, clcy-sampling_dst)), int(min(self.dim_y-1, clcy+sampling_dst)))
+            rndx = random.randint(int(max(0, clcx - sampling_dst)), int(min(self.dim_x - 1, clcx + sampling_dst)))
+            rndy = random.randint(int(max(0, clcy - sampling_dst)), int(min(self.dim_y - 1, clcy + sampling_dst)))
             if self.arr1[rndx][rndy] != 1:
                 self.samples_x.append([rndx, rndy])
                 self.samples_y.append([self.reward(rndx, rndy)])
@@ -488,13 +515,13 @@ class World:
                 y1.append([self.reward(rndx, rndy)])
             else:
                 i1 = i1 - 1
-        print('X1', X1)
-        print('y1', y1)
-        print('kmeans labels')
+        print("X1", X1)
+        print("y1", y1)
+        print("kmeans labels")
         kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(y1)
         labels1 = kmeans.labels_
         print(labels1)
-        print('kmeans centers')
+        print("kmeans centers")
         centers1 = kmeans.cluster_centers_
         print(centers1)
 
@@ -506,11 +533,11 @@ class World:
         else:
             pred_index_good = 0
             pred_index_bad = 1
-        
-        clf = svm.SVC(kernel='linear')
+
+        clf = svm.SVC(kernel="linear")
         clf.fit(X1, labels1)
-        print('clf2', clf.support_vectors_)
-        leaf_temp['clf'] = clf
+        print("clf2", clf.support_vectors_)
+        leaf_temp["clf"] = clf
 
         lbl_x1 = []
         lbl_x2 = []
@@ -519,9 +546,9 @@ class World:
         for i2 in range(0, len(labels1)):
             x2 = X1[i2][0]
             y2 = X1[i2][1]
-            print('x:', x2, 'y:', y2)
-            print('label:', labels1[i2])
-            print('')
+            print("x:", x2, "y:", y2)
+            print("label:", labels1[i2])
+            print("")
             if labels1[i2] == pred_index_bad:
                 lbl_x1.append(x2)
                 lbl_y1.append(y2)
@@ -538,17 +565,31 @@ class World:
         x_mean2 = round(statistics.mean(lbl_x2), 0)
         y_mean2 = round(statistics.mean(lbl_y2), 0)
 
-        distance_mean = math.sqrt((x_mean1-x_mean2)**2 + (y_mean1-y_mean2)**2)
+        distance_mean = math.sqrt((x_mean1 - x_mean2) ** 2 + (y_mean1 - y_mean2) ** 2)
 
         self.treeleaves2_index = self.treeleaves2_index + 1
-        d1 = {'id':self.treeleaves2_index, 'parent':leaf_id, 'mean_x':x_mean1, 'mean_y':y_mean1, 'dst': distance_mean, 'clf':svm.SVC(kernel='linear')}
+        d1 = {
+            "id": self.treeleaves2_index,
+            "parent": leaf_id,
+            "mean_x": x_mean1,
+            "mean_y": y_mean1,
+            "dst": distance_mean,
+            "clf": svm.SVC(kernel="linear"),
+        }
         self.treeleaves2_index = self.treeleaves2_index + 1
-        d2 = {'id':self.treeleaves2_index, 'parent':leaf_id, 'mean_x':x_mean2, 'mean_y':y_mean2, 'dst': distance_mean, 'clf':svm.SVC(kernel='linear')}
+        d2 = {
+            "id": self.treeleaves2_index,
+            "parent": leaf_id,
+            "mean_x": x_mean2,
+            "mean_y": y_mean2,
+            "dst": distance_mean,
+            "clf": svm.SVC(kernel="linear"),
+        }
         self.treeleaves2.append(d1)
         self.treeleaves2.append(d2)
         if self.treeleaves2_index < 3:
-            self.lamcts(d1['id'])
-            self.lamcts(d2['id'])
+            self.lamcts(d1["id"])
+            self.lamcts(d2["id"])
 
         for i3 in range(0, self.dim_x):
             for j3 in range(0, self.dim_y):
@@ -560,35 +601,43 @@ class World:
                         self.arr1[i3][j3] = 2
         # print('prediction', clf.predict([[3, 10]]))
 
-
     def plot_lap3(self):
         plt.figure(1)
         plt.grid()
-        plt.plot([-0.5, self.dim_x-0.5, self.dim_x-0.5, -0.5, -0.5], [0.5, 0.5, self.dim_y*-1+0.5, self.dim_y*-1+0.5, 0.5], color='black')
+        plt.plot(
+            [-0.5, self.dim_x - 0.5, self.dim_x - 0.5, -0.5, -0.5],
+            [0.5, 0.5, self.dim_y * -1 + 0.5, self.dim_y * -1 + 0.5, 0.5],
+            color="black",
+        )
         for i in range(0, self.dim_x):
             for j in range(0, self.dim_y):
                 if self.arr1[i][j] == 1:
-                    plt.scatter(j, -i, color='black', marker='s')
+                    plt.scatter(j, -i, color="black", marker="s")
         for treeleaf in self.treeleaves:
-            plt.scatter(treeleaf['position'][1], treeleaf['position'][0]*-1, color='black', s=100, alpha=0.20)
+            plt.scatter(treeleaf["position"][1], treeleaf["position"][0] * -1, color="black", s=100, alpha=0.20)
             for leaf2 in self.treeleaves:
-                if leaf2['id'] == treeleaf['parent']:
-                    pos2x = leaf2['position'][0]
-                    pos2y = leaf2['position'][1]
-                    plt.plot([treeleaf['position'][1], pos2y], [treeleaf['position'][0]*-1, pos2x*-1], color='blue', linestyle='dashed')
+                if leaf2["id"] == treeleaf["parent"]:
+                    pos2x = leaf2["position"][0]
+                    pos2y = leaf2["position"][1]
+                    plt.plot(
+                        [treeleaf["position"][1], pos2y],
+                        [treeleaf["position"][0] * -1, pos2x * -1],
+                        color="blue",
+                        linestyle="dashed",
+                    )
         for treeleaf2 in self.treeleaves2:
             print(treeleaf2)
-            color1='black'
+            color1 = "black"
             try:
-                print(treeleaf2['clf'].support_vectors_)
-                color1='green'
+                print(treeleaf2["clf"].support_vectors_)
+                color1 = "green"
             except:
                 pass
-            print('')
+            print("")
             # plt.scatter(treeleaf2['mean_x'], -treeleaf2['mean_y'], color=color1, marker='^')
             # plt.text(treeleaf2['mean_x'], -treeleaf2['mean_y'], treeleaf2['id'])
-        clf3 = self.treeleaves2[0]['clf']
-        clf4 = self.treeleaves2[2]['clf']
+        clf3 = self.treeleaves2[0]["clf"]
+        clf4 = self.treeleaves2[2]["clf"]
 
         points1 = []
         points2 = []
@@ -600,21 +649,21 @@ class World:
                     test5 = clf4.predict([[i4, j4]])
                     if test4 == 1:
                         # plt.scatter(j4, i4*-1, color='blue', s=100, alpha=0.5)
-                        points1.append([i4*-1, j4])
+                        points1.append([i4 * -1, j4])
                     else:
                         # plt.scatter(j4, i4*-1, color='red', s=100, alpha=0.5)
-                        points2.append([i4*-1, j4])
+                        points2.append([i4 * -1, j4])
 
         hull1 = ConvexHull(points1)
         hull2 = ConvexHull(points2)
 
         for simplex in hull1.simplices:
-            plt.plot(np.array(points1)[simplex, 1], np.array(points1)[simplex, 0], color='blue', linestyle='dotted')
+            plt.plot(np.array(points1)[simplex, 1], np.array(points1)[simplex, 0], color="blue", linestyle="dotted")
         for simplex2 in hull2.simplices:
-            plt.plot(np.array(points2)[simplex2, 1], np.array(points2)[simplex2, 0], color='red', linestyle='dotted')
+            plt.plot(np.array(points2)[simplex2, 1], np.array(points2)[simplex2, 0], color="red", linestyle="dotted")
 
-        plt.scatter(self.treeleaves2[1]['mean_x'], self.treeleaves2[1]['mean_y']*-1)
-        plt.scatter(self.treeleaves2[2]['mean_x'], self.treeleaves2[2]['mean_y']*-1)
+        plt.scatter(self.treeleaves2[1]["mean_x"], self.treeleaves2[1]["mean_y"] * -1)
+        plt.scatter(self.treeleaves2[2]["mean_x"], self.treeleaves2[2]["mean_y"] * -1)
 
         plt.show()
 
