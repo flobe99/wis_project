@@ -1,5 +1,4 @@
-"""python-astar - A* path search algorithm
-"""
+import math
 
 
 class Tile:
@@ -48,11 +47,17 @@ class Tile:
 class AStar:
     """The A Star (A*) path search algorithm"""
 
-    def __init__(self, world):
+    def __init__(self, world, reward_world, target=(0, 0)):
         self.world = world
+        self.reward_world = reward_world
+
+        self.target_x, self.target_y = target
 
     def search(self, start_pos, target_pos):
         """A_Star (A*) path search algorithm"""
+
+        self.target_x, self.target_y = target_pos
+
         start = Tile(*start_pos)
         self.open_tiles = set([start])
         self.closed_tiles = set()
@@ -62,16 +67,18 @@ class AStar:
         while len(self.open_tiles) > 0:
             # get the tile with the shortest distance
             tile = min(self.open_tiles)
+            tile_x = tile.x
+            tile_y = tile.y
             # check if we're there. Happy path!
             if tile.pos == target_pos:
-                return self.rebuild_path(tile), samples_count
+                return self.rebuild_path(tile), samples_count, self.reward_world
             # search new ways in the neighbor's tiles.
             self.search_for_tiles(tile)
 
             self.close_tile(tile)
             samples_count += 1
         # if we got here, path is blocked :(
-        return None, samples_count
+        return None, samples_count, self.reward_world
 
     def search_for_tiles(self, current):
         """Search for new tiles in the maze"""
@@ -93,6 +100,8 @@ class AStar:
         max_x = min(len(self.world) - 1, tile.x + 1)
         min_y = max(0, tile.y - 1)
         max_y = min(len(self.world[tile.x]) - 1, tile.y + 1)
+        reward_max = 0
+        direction_max = []
 
         available_tiles = [
             (min_x, tile.y),
@@ -102,13 +111,30 @@ class AStar:
         ]
         neighbors = []
         for x, y in available_tiles:
+            r1 = self.reward(x, y)
+            if r1 > reward_max:
+                reward_max = r1
+                direction_max = x, y
             if (x, y) == tile.pos:
                 continue
 
             if self.world[x][y] == 0:
                 neighbors.append(Tile(x, y))
 
+        self.reward_world[direction_max[0]][direction_max[1]] = reward_max
+
         return neighbors
+
+    def reward(self, x1, y1):
+        # print('reward', x1, y1)
+        reward2 = -5
+        try:
+            reward2 = 1 / (math.sqrt((x1 - self.target_x) ** 2 + (y1 - self.target_y) ** 2))
+        except:
+            reward2 = 5
+        # reward3 = 1 / reward2
+        # print(reward2, reward3)
+        return reward2 * 10
 
     def rebuild_path(self, current):
         """Rebuild the path from each tile"""

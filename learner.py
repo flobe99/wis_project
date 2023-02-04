@@ -76,8 +76,8 @@ class World:
         start = (self.pos_x, self.pos_y)
         goal = (self.target_x, self.target_y)
 
-        astar = AStar(self.arr1)
-        path, sample_count = astar.search(start, goal)
+        astar = AStar(self.arr1, self.arr2)
+        path, sample_count, self.arr2 = astar.search(start, goal)
 
         # find maximum reward in grid
         max_reward = float("-inf")
@@ -644,7 +644,7 @@ class World:
 
         for i4 in range(0, self.dim_x):
             for j4 in range(0, self.dim_y):
-                if w1.arr1[i4][j4] != 1:
+                if self.arr1[i4][j4] != 1:
                     test4 = clf3.predict([[i4, j4]])
                     test5 = clf4.predict([[i4, j4]])
                     if test4 == 1:
@@ -674,6 +674,8 @@ def execute_astar():
     w1_astar.a_star()  # search with AStar
     print("\nAStar Path")
     w1_astar.print_board(w1_astar.arr1)
+    print("\nAStar Reward")
+    w1_astar.print_board(w1_astar.arr2)
 
 
 def execute_mcts():
