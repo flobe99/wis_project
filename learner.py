@@ -677,6 +677,12 @@ def execute_astar():
     print("\nAStar Reward")
     w1_astar.print_board(w1_astar.arr2)
 
+    max_reward = float("-inf")
+    for row in w1_astar.arr2:
+        for col in row:
+            max_reward = max(max_reward, col)
+    print("max reward", max_reward)
+
 
 def execute_mcts():
     print("execute mcts")
