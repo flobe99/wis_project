@@ -44,6 +44,10 @@ class World:
         self.samples_x = []
         self.samples_y = []
 
+        self.samples_collected = 0
+        self.num_samples = []
+        self.max_reward = []
+
         self.treeleaves = []
         self.treeleaves2 = []
         self.treeleaves2_index = 0
@@ -329,10 +333,10 @@ class World:
                 clcx = leaf2["mean_x"]
                 clcy = leaf2["mean_y"]
                 leaf_temp = leaf2
-                sampling_dst = leaf2["dst"]
+                sampling_dst = leaf2["dst"]*0.8
         X1 = []
         y1 = []
-        for i1 in range(0, 15):
+        for i1 in range(0, 6):
             rndx = random.randint(int(max(0, clcx - sampling_dst)), int(min(self.dim_x - 1, clcx + sampling_dst)))
             rndy = random.randint(int(max(0, clcy - sampling_dst)), int(min(self.dim_y - 1, clcy + sampling_dst)))
             if self.arr1[rndx][rndy] != 1:
@@ -340,10 +344,13 @@ class World:
                 y1.append([self.reward(rndx, rndy)])
             else:
                 i1 = i1 - 1
+        self.samples_collected = self.samples_collected + 6
+        self.num_samples.append(self.samples_collected)
         print("X1", X1)
         print("y1", y1)
         print("kmeans labels")
-        kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(y1)
+        # kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(y1)
+        kmeans = KMeans(n_clusters=2).fit(y1)
         labels1 = kmeans.labels_
         print(labels1)
         print("kmeans centers")
@@ -366,8 +373,10 @@ class World:
 
         lbl_x1 = []
         lbl_x2 = []
+        rew_1 = []
         lbl_y1 = []
         lbl_y2 = []
+        rew_2 = []
         for i2 in range(0, len(labels1)):
             x2 = X1[i2][0]
             y2 = X1[i2][1]
@@ -377,9 +386,11 @@ class World:
             if labels1[i2] == pred_index_bad:
                 lbl_x1.append(x2)
                 lbl_y1.append(y2)
+                rew_1.append(self.reward(x2, y2))
             if labels1[i2] == pred_index_good:
                 lbl_x2.append(x2)
                 lbl_y2.append(y2)
+                rew_2.append(self.reward(x2, y2))
             # if labels1[i2] == 1:
             #     self.arr1[x2][y2] = 2
             # if labels1[i2] == 0:
@@ -387,8 +398,10 @@ class World:
 
         x_mean1 = round(statistics.mean(lbl_x1), 0)
         y_mean1 = round(statistics.mean(lbl_y1), 0)
+        rew_mean1 = round(statistics.mean(rew_1), 0)
         x_mean2 = round(statistics.mean(lbl_x2), 0)
         y_mean2 = round(statistics.mean(lbl_y2), 0)
+        rew_mean2 = round(statistics.mean(rew_2), 0)
 
         distance_mean = math.sqrt((x_mean1 - x_mean2) ** 2 + (y_mean1 - y_mean2) ** 2)
 
@@ -398,6 +411,7 @@ class World:
             "parent": leaf_id,
             "mean_x": x_mean1,
             "mean_y": y_mean1,
+            "mean_reward" : rew_mean1,
             "dst": distance_mean,
             "clf": svm.SVC(kernel="linear"),
         }
@@ -407,23 +421,34 @@ class World:
             "parent": leaf_id,
             "mean_x": x_mean2,
             "mean_y": y_mean2,
+            "mean_reward" : rew_mean2,
             "dst": distance_mean,
             "clf": svm.SVC(kernel="linear"),
         }
         self.treeleaves2.append(d1)
         self.treeleaves2.append(d2)
-        if self.treeleaves2_index < 3:
+        rew_temp = 0
+        for leaf12 in self.treeleaves2:
+            print("leaf12", leaf12)
+            try:
+                if leaf12["mean_reward"] > rew_temp:
+                    rew_temp = leaf12["mean_reward"]
+            except:
+                pass
+        self.max_reward.append(rew_temp)
+
+        if self.treeleaves2_index < 7:
             self.lamcts(d1["id"])
             self.lamcts(d2["id"])
 
-        for i3 in range(0, self.dim_x):
-            for j3 in range(0, self.dim_y):
-                if self.arr1[i3][j3] != 1:
-                    pred = clf.predict([[i3, j3]])
-                    if pred[0] == 0:
-                        self.arr1[i3][j3] = 9
-                    if pred[0] == 1:
-                        self.arr1[i3][j3] = 2
+        # for i3 in range(0, self.dim_x):
+        #     for j3 in range(0, self.dim_y):
+        #         if self.arr1[i3][j3] != 1:
+        #             pred = clf.predict([[i3, j3]])
+        #             if pred[0] == 0:
+        #                 self.arr1[i3][j3] = 9
+        #             if pred[0] == 1:
+        #                 self.arr1[i3][j3] = 2
         # print('prediction', clf.predict([[3, 10]]))
 
     def plot_lamcts(self):
@@ -487,8 +512,16 @@ class World:
         for simplex2 in hull2.simplices:
             plt.plot(np.array(points2)[simplex2, 1], np.array(points2)[simplex2, 0], color="red", linestyle="dotted")
 
-        plt.scatter(self.treeleaves2[1]["mean_x"], self.treeleaves2[1]["mean_y"] * -1)
-        plt.scatter(self.treeleaves2[2]["mean_x"], self.treeleaves2[2]["mean_y"] * -1)
+        # plt.scatter(self.treeleaves2[1]["mean_x"], self.treeleaves2[1]["mean_y"] * -1, color="black", marker="^")
+        # plt.scatter(self.treeleaves2[2]["mean_x"], self.treeleaves2[2]["mean_y"] * -1, color="black", marker="v")
+        for treeleaf3 in self.treeleaves2:
+            plt.scatter(treeleaf3["mean_x"], treeleaf3["mean_y"]*-1)
+            plt.text(treeleaf3['mean_x'], -treeleaf3['mean_y'], treeleaf3['id'])
+
+        print('num_samples')
+        print(self.num_samples)
+        print('max_reward')
+        print(self.max_reward)
 
         plt.show()
 
@@ -515,6 +548,8 @@ class World:
                 y1.append([self.reward(rndx, rndy)])
             else:
                 i1 = i1 - 1
+        self.samples_collected = self.samples_collected + 15
+        self.num_samples.append(self.samples_collected)
         print("X1", X1)
         print("y1", y1)
         print("kmeans labels")
@@ -587,6 +622,7 @@ class World:
         }
         self.treeleaves2.append(d1)
         self.treeleaves2.append(d2)
+
         if self.treeleaves2_index < 3:
             self.lamcts(d1["id"])
             self.lamcts(d2["id"])
