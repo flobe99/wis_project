@@ -17,10 +17,10 @@ from scipy.spatial import ConvexHull, convex_hull_plot_2d
 
 
 class World:
-    def __init__(self):
+    def __init__(self, p_dim_x=12, p_dim_y=12):
         self.epsilon = 0.2
-        self.dim_x = 12
-        self.dim_y = 12
+        self.dim_x = p_dim_x
+        self.dim_y = p_dim_y
 
         self.arr1 = np.zeros([self.dim_x, self.dim_y])
         self.arr2 = np.zeros([self.dim_x, self.dim_y])
@@ -28,12 +28,13 @@ class World:
         self.pos_x = 0
         self.pos_y = 0
 
-        self.target_x = 11
+        self.target_x = self.dim_x - 1
         self.target_y = 1
 
         self.reset_board()
 
-        self.directions = [[0, 0], [0, 1], [0, -1], [1, 0], [1, 1], [1, -1], [-1, 0], [-1, 1], [-1, -1]]
+        self.directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        # self.directions = [[0, 1], [0, -1], [1, 0], [1, 1], [1, -1], [-1, 0], [-1, 1], [-1, -1]]
 
         self.possible_directions = []
 
@@ -178,10 +179,31 @@ class World:
 
     def reset_board(self):
 
+        # senkrecht oben
+        y = int(self.dim_x / 2 - 1)
+        for i in range(0, int(self.dim_x / 3)):
+            self.arr1[i][y] = 1
+
+        # waagrecht
+        x = int(self.dim_y / 2 + 1)
+        for i in range(0, int(self.dim_y / 1.5)):
+            self.arr1[x][i] = 1
+
+        # senkrecht unten
+        y = int(self.dim_x / 1.5) - 1
+        for i in range(int(self.dim_x / 3), int(self.dim_y / 2) + 1):
+            self.arr1[i][y] = 1
+
+        # senkrecht oben
+        """
         self.arr1[0][5] = 1
         self.arr1[1][5] = 1
         self.arr1[2][5] = 1
         self.arr1[3][5] = 1
+        """
+
+        # waagrecht
+        """
         self.arr1[7][0] = 1
         self.arr1[7][1] = 1
         self.arr1[7][2] = 1
@@ -190,10 +212,15 @@ class World:
         self.arr1[7][5] = 1
         self.arr1[7][6] = 1
         self.arr1[7][7] = 1
+        """
+
+        # senkrecht unten
+        """
         self.arr1[7][8] = 1
         self.arr1[6][8] = 1
         self.arr1[5][8] = 1
         self.arr1[4][8] = 1
+        """
 
     def print_board(self, board):
         for row in board:
@@ -333,7 +360,7 @@ class World:
                 clcx = leaf2["mean_x"]
                 clcy = leaf2["mean_y"]
                 leaf_temp = leaf2
-                sampling_dst = leaf2["dst"]*0.8
+                sampling_dst = leaf2["dst"] * 0.8
         X1 = []
         y1 = []
         for i1 in range(0, 6):
@@ -346,16 +373,16 @@ class World:
                 i1 = i1 - 1
         self.samples_collected = self.samples_collected + 6
         self.num_samples.append(self.samples_collected)
-        print("X1", X1)
-        print("y1", y1)
-        print("kmeans labels")
+        # print("X1", X1)
+        # print("y1", y1)
+        # print("kmeans labels")
         # kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(y1)
         kmeans = KMeans(n_clusters=2).fit(y1)
         labels1 = kmeans.labels_
-        print(labels1)
-        print("kmeans centers")
+        # print(labels1)
+        # print("kmeans centers")
         centers1 = kmeans.cluster_centers_
-        print(centers1)
+        # print(centers1)
 
         pred_index_good = 5
         pred_index_bad = 5
@@ -368,7 +395,7 @@ class World:
 
         clf = svm.SVC(kernel="linear")
         clf.fit(X1, labels1)
-        print("clf2", clf.support_vectors_)
+        # print("clf2", clf.support_vectors_)
         leaf_temp["clf"] = clf
 
         lbl_x1 = []
@@ -380,9 +407,9 @@ class World:
         for i2 in range(0, len(labels1)):
             x2 = X1[i2][0]
             y2 = X1[i2][1]
-            print("x:", x2, "y:", y2)
-            print("label:", labels1[i2])
-            print("")
+            # print("x:", x2, "y:", y2)
+            # print("label:", labels1[i2])
+            # print("")
             if labels1[i2] == pred_index_bad:
                 lbl_x1.append(x2)
                 lbl_y1.append(y2)
@@ -411,7 +438,7 @@ class World:
             "parent": leaf_id,
             "mean_x": x_mean1,
             "mean_y": y_mean1,
-            "mean_reward" : rew_mean1,
+            "mean_reward": rew_mean1,
             "dst": distance_mean,
             "clf": svm.SVC(kernel="linear"),
         }
@@ -421,7 +448,7 @@ class World:
             "parent": leaf_id,
             "mean_x": x_mean2,
             "mean_y": y_mean2,
-            "mean_reward" : rew_mean2,
+            "mean_reward": rew_mean2,
             "dst": distance_mean,
             "clf": svm.SVC(kernel="linear"),
         }
@@ -476,14 +503,14 @@ class World:
                         linestyle="dashed",
                     )
         for treeleaf2 in self.treeleaves2:
-            print(treeleaf2)
+            # print(treeleaf2)
             color1 = "black"
             try:
-                print(treeleaf2["clf"].support_vectors_)
+                # print(treeleaf2["clf"].support_vectors_)
                 color1 = "green"
             except:
                 pass
-            print("")
+            # print("")
             # plt.scatter(treeleaf2['mean_x'], -treeleaf2['mean_y'], color=color1, marker='^')
             # plt.text(treeleaf2['mean_x'], -treeleaf2['mean_y'], treeleaf2['id'])
         clf3 = self.treeleaves2[0]["clf"]
@@ -515,12 +542,12 @@ class World:
         # plt.scatter(self.treeleaves2[1]["mean_x"], self.treeleaves2[1]["mean_y"] * -1, color="black", marker="^")
         # plt.scatter(self.treeleaves2[2]["mean_x"], self.treeleaves2[2]["mean_y"] * -1, color="black", marker="v")
         for treeleaf3 in self.treeleaves2:
-            plt.scatter(treeleaf3["mean_x"], treeleaf3["mean_y"]*-1)
-            plt.text(treeleaf3['mean_x'], -treeleaf3['mean_y'], treeleaf3['id'])
+            plt.scatter(treeleaf3["mean_x"], treeleaf3["mean_y"] * -1)
+            plt.text(treeleaf3["mean_x"], -treeleaf3["mean_y"], treeleaf3["id"])
 
-        print('num_samples')
+        print("num_samples")
         print(self.num_samples)
-        print('max_reward')
+        print("max_reward")
         print(self.max_reward)
 
         plt.show()
@@ -727,7 +754,7 @@ def execute_mcts():
     # w1_mcts.print_board(w1_mcts.arr1)
 
     # w1_mcts.treesearch_simple(800)
-    w1_mcts = World()
+    w1_mcts = World(12, 12)
     w1_mcts.take_samples(15)
     w1_mcts.lamcts(0)
 
@@ -745,7 +772,7 @@ def execute_mcts():
 
 
 def execute_lap3():
-    w1_lap3 = World()
+    w1_lap3 = World(12, 12)
 
 
 def main():
