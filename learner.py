@@ -525,40 +525,37 @@ class World:
 
         plt.show()
 
-    def lap3(self, leaf_id, samples_xvec, samplex_yvec):
-        clcx = 0
-        clcy = 0
-        sampling_dst = 0
+    def lap3(self, leaf_id, sampling, samples_1, samples_2):
+        print("------- LAP3", leaf_id, sampling, samples_1, samples_2, "--------")
+        samples_x = []
+        samples_y = []
         leaf_temp = {}
         for leaf2 in self.treeleaves2:
             if leaf2["id"] == leaf_id:
                 clcx = leaf2["mean_x"]
                 clcy = leaf2["mean_y"]
                 leaf_temp = leaf2
-                sampling_dst = leaf2["dst"]
-        X1 = []
-        y1 = []
-        for i1 in range(0, 15):
-            rndx = random.randint(int(max(0, clcx - sampling_dst)), int(min(self.dim_x - 1, clcx + sampling_dst)))
-            rndy = random.randint(int(max(0, clcy - sampling_dst)), int(min(self.dim_y - 1, clcy + sampling_dst)))
-            if self.arr1[rndx][rndy] != 1:
-                self.samples_x.append([rndx, rndy])
-                self.samples_y.append([self.reward(rndx, rndy)])
-                X1.append([rndx, rndy])
-                y1.append([self.reward(rndx, rndy)])
-            else:
-                i1 = i1 - 1
-        self.samples_collected = self.samples_collected + 15
+        if sampling == True:
+            self.take_samples(50)
+            samples_x = self.samples_x
+            samples_y = self.samples_y
+        else:
+            samples_x = samples_1
+            samples_y = samples_2
+        self.samples_collected = self.samples_collected + 50
         self.num_samples.append(self.samples_collected)
-        print("X1", X1)
-        print("y1", y1)
-        print("kmeans labels")
-        kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(y1)
+        print("LAP3")
+        print("samples_x", samples_x)
+        print("samples_y", samples_y)
+        
+        kmeans = KMeans(n_clusters=2).fit(samples_y)
+        # kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(samples_y)
         labels1 = kmeans.labels_
+        print("kmeans labels", "(", len(labels1), ")")
         print(labels1)
         print("kmeans centers")
         centers1 = kmeans.cluster_centers_
-        print(centers1)
+        print("lap3 centers", centers1)
 
         pred_index_good = 5
         pred_index_bad = 5
@@ -570,37 +567,48 @@ class World:
             pred_index_bad = 1
 
         clf = svm.SVC(kernel="linear")
-        clf.fit(X1, labels1)
-        print("clf2", clf.support_vectors_)
+        clf.fit(samples_x, labels1)
+        print("lap3 clf2", clf.support_vectors_)
         leaf_temp["clf"] = clf
 
         lbl_x1 = []
         lbl_x2 = []
         lbl_y1 = []
         lbl_y2 = []
+        rew_1 = []
+        rew_2 = []
+        xvec_good = []
+        xvec_bad = []
+        yvec_good = []
+        yvec_bad = []
         for i2 in range(0, len(labels1)):
-            x2 = X1[i2][0]
-            y2 = X1[i2][1]
-            print("x:", x2, "y:", y2)
-            print("label:", labels1[i2])
-            print("")
+            x2 = samples_x[i2][0]
+            y2 = samples_x[i2][1]
+            # print("x:", x2, "y:", y2)
+            # print("label:", labels1[i2])
+            # print("")
             if labels1[i2] == pred_index_bad:
                 lbl_x1.append(x2)
                 lbl_y1.append(y2)
+                xvec_bad.append([x2, y2])
+                yvec_bad.append([self.reward(x2, y2)])
+                rew_1.append(self.reward(x2, y2))
             if labels1[i2] == pred_index_good:
                 lbl_x2.append(x2)
                 lbl_y2.append(y2)
+                xvec_good.append([x2, y2])
+                yvec_good.append([self.reward(x2, y2)])
+                rew_2.append(self.reward(x2, y2))
             # if labels1[i2] == 1:
             #     self.arr1[x2][y2] = 2
             # if labels1[i2] == 0:
             #     self.arr1[x2][y2] = 9
-
         x_mean1 = round(statistics.mean(lbl_x1), 0)
         y_mean1 = round(statistics.mean(lbl_y1), 0)
+        rew_mean1 = round(statistics.mean(rew_1), 0)
         x_mean2 = round(statistics.mean(lbl_x2), 0)
         y_mean2 = round(statistics.mean(lbl_y2), 0)
-
-        distance_mean = math.sqrt((x_mean1 - x_mean2) ** 2 + (y_mean1 - y_mean2) ** 2)
+        rew_mean2 = round(statistics.mean(rew_2), 0)
 
         self.treeleaves2_index = self.treeleaves2_index + 1
         d1 = {
@@ -608,7 +616,8 @@ class World:
             "parent": leaf_id,
             "mean_x": x_mean1,
             "mean_y": y_mean1,
-            "dst": distance_mean,
+            "mean_reward" : rew_mean1,
+            "dst": 0,
             "clf": svm.SVC(kernel="linear"),
         }
         self.treeleaves2_index = self.treeleaves2_index + 1
@@ -617,24 +626,27 @@ class World:
             "parent": leaf_id,
             "mean_x": x_mean2,
             "mean_y": y_mean2,
-            "dst": distance_mean,
+            "mean_reward" : rew_mean2,
+            "dst": 0,
             "clf": svm.SVC(kernel="linear"),
         }
         self.treeleaves2.append(d1)
         self.treeleaves2.append(d2)
+        print("")
 
-        if self.treeleaves2_index < 3:
-            self.lamcts(d1["id"])
-            self.lamcts(d2["id"])
+        if len(yvec_good) > 3:
+            self.lap3(d1["id"], False, xvec_good, yvec_good)
+        if len(yvec_bad) > 3:
+            self.lap3(d2["id"], False, xvec_bad, yvec_bad)
 
-        for i3 in range(0, self.dim_x):
-            for j3 in range(0, self.dim_y):
-                if self.arr1[i3][j3] != 1:
-                    pred = clf.predict([[i3, j3]])
-                    if pred[0] == 0:
-                        self.arr1[i3][j3] = 9
-                    if pred[0] == 1:
-                        self.arr1[i3][j3] = 2
+        # for i3 in range(0, self.dim_x):
+        #     for j3 in range(0, self.dim_y):
+        #         if self.arr1[i3][j3] != 1:
+        #             pred = clf.predict([[i3, j3]])
+        #             if pred[0] == 0:
+        #                 self.arr1[i3][j3] = 9
+        #             if pred[0] == 1:
+        #                 self.arr1[i3][j3] = 2
         # print('prediction', clf.predict([[3, 10]]))
 
     def plot_lap3(self):
@@ -746,11 +758,12 @@ def execute_mcts():
 
 def execute_lap3():
     w1_lap3 = World()
+    w1_lap3.lap3(0, True, [], [])
 
 
 def main():
-    execute_astar()
-    execute_mcts()
+    # execute_astar()
+    # execute_mcts()
     execute_lap3()
 
 
