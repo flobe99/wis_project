@@ -31,7 +31,8 @@ class World:
         self.target_x = self.dim_x - 1
         self.target_y = 1
 
-        self.reset_board()
+        # self.reset_board("maze s3")
+        self.reset_board("4 rooms")
 
         self.directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
         # self.directions = [[0, 1], [0, -1], [1, 0], [1, 1], [1, -1], [-1, 0], [-1, 1], [-1, -1]]
@@ -93,11 +94,12 @@ class World:
         print("Maximum reward:", max_reward)
         print("Sample Count:", sample_count)
 
-        for item in path:
-            self.arr1[item[0]][item[1]] = 8
+        if path != None:
+            for item in path:
+                self.arr1[item[0]][item[1]] = 8
 
-        self.arr1[start[0]][start[1]] = 3
-        self.arr1[goal[0]][goal[1]] = 3
+            self.arr1[start[0]][start[1]] = 3
+            self.arr1[goal[0]][goal[1]] = 3
 
     def get_directions(self):
         self.possible_directions = []
