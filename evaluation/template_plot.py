@@ -28,8 +28,8 @@ def box_plot(title):
     plt.show()
 
 
-def test():
-    df = get_data("test.csv")
+def plot_samples_b_8_test():
+    df = get_data("maze_samples_b_8.csv")
     # Erstellen des Liniendiagramms
     sns.set_style("darkgrid")
     sns.set_palette("bright")
@@ -38,7 +38,7 @@ def test():
     # sns.lineplot(data=df, x="complexity", y="A*")
 
     # Hinzufügen einer nicht-linearen Regression
-    sns.regplot(data=df, x="complexity", y="A*", order=2, ci=None, scatter=False, label="Regression")
+    sns.regplot(data=df, x="complexity", y="algorithm", order=2, ci=None, scatter=False, label="Regression")
 
     # Titel und Achsenbeschriftungen hinzufügen
     plt.title("Algorithmic Performance Comparison over Time")
@@ -49,14 +49,10 @@ def test():
     plt.show()
 
 
-def line_plot_samples(title, y, astar, mcts, lap3):
+def line_plot_samples(title, data):
 
     plt.title(title)
-    plt.plot(y, astar, color="red")
-    plt.plot(y, mcts, color="blue")
-    plt.plot(y, lap3, color="green")
-    plt.ylabel("samples")
-    plt.xlabel("space complexity")
+    sns.lineplot(x="complexity", y="samples", hue="algorithm", data=data)
     plt.show()
 
 
@@ -66,12 +62,7 @@ def line_plot_samples(title, y, astar, mcts, lap3):
 def plot_samples_b_4():
 
     data = get_data("maze_samples_b_4.csv")
-    # x = data["complexity"].values
-    y = data[["complexity"]].values
-    astar = data[["A*"]].values
-    mcts = data[["MCTS"]]
-    lap3 = data[["LAP3"]]
-    line_plot_samples("maze samples with b=4", y, astar, mcts, lap3)
+    line_plot_samples("maze samples with b=4", data)
 
 
 """plot reward of A*, MCTS, LAP3 with b=4"""
@@ -79,47 +70,47 @@ def plot_samples_b_4():
 
 def plot_reward_b_4():
     data = get_data("maze_samples_b_4.csv")
-    # x = data["complexity"].values
-    y = data[["complexity"]].values
-    astar = data[["A*"]].values
-    mcts = data[["MCTS"]]
-    lap3 = data[["LAP3"]]
-    line_plot_samples("maze samples with b=4", y, astar, mcts, lap3)
+    line_plot_samples("maze samples with b=4", data)
 
 
 """plot samples of A*, MCTS, LAP3 with b=8"""
 
 
 def plot_samples_b_8():
-    x = [12, 24, 36, 48, 60]
-    astar = [50, 100, 200, 300, 500]
-    mcts = [50, 100, 150, 200, 250]
-    lap3 = [50, 75, 87, 93, 99]
+    data = get_data("maze_samples_b_8.csv")
 
-    line_plot_samples("maze samples with b=8", x, astar, mcts, lap3)
+    line_plot_samples("maze samples with b=8", data)
+
+
+def plot_reward_b_8():
+    data = get_data("maze_samples_b_8.csv")
+    # x = data["complexity"].values
+    y = data[["complexity"]].values
+    astar = data[["A*"]].values
+    mcts = data[["MCTS"]]
+    lap3 = data[["LAP3"]]
+    line_plot_samples("maze samples with b=8", data)
 
 
 """plot samples of A*, MCTS, LAP3 with b=16"""
 
 
 def plot_samples_b_16():
-    x = [12, 24, 36, 48, 60]
-    astar = [50, 100, 200, 300, 500]
-    mcts = [50, 100, 150, 200, 250]
-    lap3 = [50, 75, 87, 93, 99]
+    data = get_data("maze_samples_b_16.csv")
 
-    line_plot_samples("maze samples with b=16", x, astar, mcts, lap3)
+    line_plot_samples("maze samples with b=16", data)
 
 
 def main():
 
-    plot_samples_b_4()
+    # plot_samples_b_4()
     plot_samples_b_8()
-    plot_samples_b_16()
-    box_plot("test")
-    heatmap_plot("test")
-
-    test()
+    # plot_samples_b_16()
+    # box_plot("test")
+    # heatmap_plot("test")
+    # plot_samples_b_8_test()
+    # plot_samples_b_8_test()
+    # plot_samples_b_8_with_noise()
 
 
 if __name__ == "__main__":
