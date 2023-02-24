@@ -179,22 +179,45 @@ class World:
                 self.move_predict()
             self.print_board(self.arr1)
 
-    def reset_board(self):
+    def reset_board(self, world_type):
 
-        # senkrecht oben
-        y = int(self.dim_x / 2 - 1)
-        for i in range(0, int(self.dim_x / 3)):
-            self.arr1[i][y] = 1
+        if world_type == "maze s3":
 
-        # waagrecht
-        x = int(self.dim_y / 2 + 1)
-        for i in range(0, int(self.dim_y / 1.5)):
-            self.arr1[x][i] = 1
+            # vertical oben
+            y = int(self.dim_x / 2 - 1)
+            for i in range(0, int(self.dim_x / 3)):
+                self.arr1[i][y] = 1
 
-        # senkrecht unten
-        y = int(self.dim_x / 1.5) - 1
-        for i in range(int(self.dim_x / 3), int(self.dim_y / 2) + 1):
-            self.arr1[i][y] = 1
+            # horizontal
+            x = int(self.dim_y / 2 + 1)
+            for i in range(0, int(self.dim_y / 1.5)):
+                self.arr1[x][i] = 1
+
+            # vertical unten
+            y = int(self.dim_x / 1.5) - 1
+            for i in range(int(self.dim_x / 3), int(self.dim_y / 2) + 1):
+                self.arr1[i][y] = 1
+
+        if world_type == "4 rooms":
+            # vertical
+            y = int(self.dim_x / 2)
+            dy = int(y / 2)
+
+            for i in range(0, self.dim_y):
+                self.arr1[i][y] = 1
+                if i == (y - dy) or i == (y + dy):
+                    self.arr1[i][y] = 0
+
+            # horizontal
+            x = int(self.dim_y / 2)
+            dx = int(x / 2)
+            for i in range(0, self.dim_x):
+                self.arr1[x][i] = 1
+                if i == (x - dx) or i == (x + dx):
+                    self.arr1[x][i] = 0
+
+        else:
+            print("Rooms not defined")
 
         # senkrecht oben
         """
