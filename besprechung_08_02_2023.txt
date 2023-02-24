@@ -1,0 +1,20 @@
+Präsentation
+- anhand von konkreten Beispiel algorithm durchgehen
+- Wie verständlich wurden die Ergebnisse präsentiert?
+
+A* Verzweigungsfaktor deutlich kleiner wie bei anderen Algorithmen
+
+ToDO:
+- wie Verhalten sich die Algorithmen mit einem höheren Verzweigungsfaktor?
+- mehr Dimensionen?
+- Warum gibt es überhaupt so viele Algorithmen? Vorteile und Nachteile
+
+
+laut Schneider:
+- A* wird schlechter wenn der Verzweidungsfaktor größer wird (Deshalb wurde MCTS entwickelt)
+- MCTS Suchraum mit hohen Verzweigungsfaktor besser
+
+
+Ende Februar ein weiteres Treffen um genaue
+
+Besprechen wie die Note zustande kommt
