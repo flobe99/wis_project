@@ -31,8 +31,8 @@ class World:
         self.target_x = self.dim_x - 1
         self.target_y = 1
 
-        # self.reset_board("maze s3")
-        self.reset_board("4 rooms")
+        self.reset_board("maze s3")
+        # self.reset_board("4 rooms")
 
         self.directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
         # self.directions = [[0, 1], [0, -1], [1, 0], [1, 1], [1, -1], [-1, 0], [-1, 1], [-1, -1]]
