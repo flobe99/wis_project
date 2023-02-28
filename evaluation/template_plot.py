@@ -56,6 +56,12 @@ def line_plot_samples(title, data):
     plt.show()
 
 
+def line_plot_samples_reward(title, data):
+    plt.title(title)
+    sns.lineplot(x="samples", y="reward", hue="algorithm", data=data)
+    plt.show()
+
+
 """plot samples of A*, MCTS, LAP3 with b=4"""
 
 
@@ -101,16 +107,24 @@ def plot_samples_b_16():
     line_plot_samples("maze samples with b=16", data)
 
 
+def plot_samples_b_8_samples_reward_list():
+    data = get_data("maze_samples_b_8_samples_reward_list.csv")
+
+    line_plot_samples_reward("plot_samples_b_8_samples_reward_list", data)
+
+
 def main():
 
     # plot_samples_b_4()
-    plot_samples_b_8()
+    # plot_samples_b_8()
+    # plot_reward_b_8()
     # plot_samples_b_16()
     # box_plot("test")
     # heatmap_plot("test")
     # plot_samples_b_8_test()
     # plot_samples_b_8_test()
     # plot_samples_b_8_with_noise()
+    plot_samples_b_8_samples_reward_list()
 
 
 if __name__ == "__main__":

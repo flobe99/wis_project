@@ -1,0 +1,8 @@
+complexity,algorithm,samples,reward, b
+12,"MCTS",6,2,8
+12,"MCTS",12,2,8
+12,"MCTS",18,2,8
+12,"MCTS",24,2,8
+12,"MCTS",30,3,8
+12,"MCTS",36,10,8
+12,"MCTS",42,10,8
