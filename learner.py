@@ -59,7 +59,13 @@ class World:
         self.predict_leaves = []
 
         self.treeleaves.append(
-            {"id": self.leaf_id, "parent": -5, "parent_action": [0], "reward": -5, "position": [self.pos_x, self.pos_y]}
+            {
+                "id": self.leaf_id,
+                "parent": -5,
+                "parent_action": [0],
+                "reward": -5,
+                "position": [self.pos_x, self.pos_y],
+            }
         )
         self.leaf_id = self.leaf_id + 1
 
@@ -389,7 +395,7 @@ class World:
                 clcx = leaf2["mean_x"]
                 clcy = leaf2["mean_y"]
                 leaf_temp = leaf2
-                sampling_dst = leaf2["dst"]*0.8
+                sampling_dst = leaf2["dst"] * 0.8
         X1 = []
         y1 = []
         for i1 in range(0, 6):
@@ -467,7 +473,7 @@ class World:
             "parent": leaf_id,
             "mean_x": x_mean1,
             "mean_y": y_mean1,
-            "mean_reward" : rew_mean1,
+            "mean_reward": rew_mean1,
             "dst": distance_mean,
             "clf": svm.SVC(kernel="linear"),
         }
@@ -477,7 +483,7 @@ class World:
             "parent": leaf_id,
             "mean_x": x_mean2,
             "mean_y": y_mean2,
-            "mean_reward" : rew_mean2,
+            "mean_reward": rew_mean2,
             "dst": distance_mean,
             "clf": svm.SVC(kernel="linear"),
         }
@@ -571,12 +577,12 @@ class World:
         # plt.scatter(self.treeleaves2[1]["mean_x"], self.treeleaves2[1]["mean_y"] * -1, color="black", marker="^")
         # plt.scatter(self.treeleaves2[2]["mean_x"], self.treeleaves2[2]["mean_y"] * -1, color="black", marker="v")
         for treeleaf3 in self.treeleaves2:
-            plt.scatter(treeleaf3["mean_x"], treeleaf3["mean_y"]*-1)
-            plt.text(treeleaf3['mean_x'], -treeleaf3['mean_y'], treeleaf3['id'])
+            plt.scatter(treeleaf3["mean_x"], treeleaf3["mean_y"] * -1)
+            plt.text(treeleaf3["mean_x"], -treeleaf3["mean_y"], treeleaf3["id"])
 
-        print('num_samples')
+        print("num_samples")
         print(self.num_samples)
-        print('max_reward')
+        print("max_reward")
         print(self.max_reward)
 
         plt.show()
@@ -603,7 +609,7 @@ class World:
         print("LAP3")
         print("samples_x", samples_x)
         print("samples_y", samples_y)
-        
+
         kmeans = KMeans(n_clusters=2).fit(samples_y)
         # kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(samples_y)
         labels1 = kmeans.labels_
@@ -672,9 +678,9 @@ class World:
             "parent": leaf_id,
             "mean_x": x_mean1,
             "mean_y": y_mean1,
-            "mean_reward" : rew_mean1,
-            "parent_classification" : pred_index_bad,
-            "parent_section" : "bad",
+            "mean_reward": rew_mean1,
+            "parent_classification": pred_index_bad,
+            "parent_section": "bad",
             "dst": 0,
             "clf": svm.SVC(kernel="linear"),
         }
@@ -684,9 +690,9 @@ class World:
             "parent": leaf_id,
             "mean_x": x_mean2,
             "mean_y": y_mean2,
-            "mean_reward" : rew_mean2,
-            "parent_classification" : pred_index_good,
-            "parent_section" : "good",
+            "mean_reward": rew_mean2,
+            "parent_classification": pred_index_good,
+            "parent_section": "good",
             "dst": 0,
             "clf": svm.SVC(kernel="linear"),
         }
@@ -710,7 +716,13 @@ class World:
         # print('prediction', clf.predict([[3, 10]]))
 
     def lap3_predict(self, leaf_id, pos1):
-        print("leaf", leaf_id, "prediction for", pos1, ":", )
+        print(
+            "leaf",
+            leaf_id,
+            "prediction for",
+            pos1,
+            ":",
+        )
         self.predict_leaves.append(leaf_id)
         try:
             clf1 = self.treeleaves2[leaf_id]["clf"]
@@ -728,15 +740,13 @@ class World:
         print("predict leaves")
         self.predict_leaves.reverse()
         print(self.predict_leaves)
-        
-
 
         self.find_child(self.predict_leaves[-1])
         print("predict leaves inserted")
         print(self.predict_leaves)
         for predict_leaf in self.predict_leaves:
             self.path_x.append(self.treeleaves2[predict_leaf]["mean_x"])
-            self.path_y.append(self.treeleaves2[predict_leaf]["mean_y"]*-1)
+            self.path_y.append(self.treeleaves2[predict_leaf]["mean_y"] * -1)
         # while len(self.predict_leaves) > 0:
         #     print("last precict leaves item:", self.predict_leaves[-1])
         #     self.predict_leaves.pop(-1)
@@ -752,7 +762,6 @@ class World:
                 except:
                     pass
                     # self.find_child(leaf1["id"])
-
 
     def plot_lap3(self):
         plt.figure(1)
@@ -819,15 +828,15 @@ class World:
         # plt.scatter(self.treeleaves2[2]["mean_x"], self.treeleaves2[2]["mean_y"] * -1, color='red', marker='v')
 
         for treeleaf4 in self.treeleaves2:
-            plt.scatter(treeleaf4["mean_x"], treeleaf4["mean_y"] * -1, color='red', marker='x')
-            plt.text(treeleaf4["mean_x"], -treeleaf4["mean_y"], treeleaf4['id'])
+            plt.scatter(treeleaf4["mean_x"], treeleaf4["mean_y"] * -1, color="red", marker="x")
+            plt.text(treeleaf4["mean_x"], -treeleaf4["mean_y"], treeleaf4["id"])
 
         plt.plot(self.path_x, self.path_y)
 
         print("no of samples collected:", len(self.samples_x))
         max_reward = -5000
         for leaf_eval in self.treeleaves2:
-            try:            
+            try:
                 if leaf_eval["mean_reward"] > max_reward:
                     max_reward = leaf_eval["mean_reward"]
             except:
@@ -885,8 +894,8 @@ def execute_lap3():
 
 
 def main():
-    # execute_astar()
-    # execute_mcts()
+    execute_astar()
+    execute_mcts()
     execute_lap3()
 
 
