@@ -52,6 +52,8 @@ class AStar:
         self.reward_world = reward_world
 
         self.target_x, self.target_y = target
+        self.liste_samples = []
+        self.liste_reward = []
 
     def search(self, start_pos, target_pos):
         """A_Star (A*) path search algorithm"""
@@ -71,14 +73,36 @@ class AStar:
             tile_y = tile.y
             # check if we're there. Happy path!
             if tile.pos == target_pos:
-                return self.rebuild_path(tile), samples_count, self.reward_world
+                return (
+                    self.rebuild_path(tile),
+                    samples_count,
+                    max(self.liste_reward),
+                    self.liste_samples,
+                    self.liste_reward,
+                )
             # search new ways in the neighbor's tiles.
             self.search_for_tiles(tile)
 
             self.close_tile(tile)
+            # self.reward(self.x, self.y)
             samples_count += 1
+            self.liste_samples.append(samples_count)
+            # print("samples count:", samples_count)
+            # print("reward count:", self.reward_world)
         # if we got here, path is blocked :(
-        return None, samples_count, self.reward_world
+
+        return None, samples_count, self.reward_world, self.liste_samples, self.liste_reward
+
+    def reward(self, x1, y1):
+        # print('reward', x1, y1)
+        reward2 = -5
+        try:
+            reward2 = 1 / (math.sqrt((x1 - self.target_x) ** 2 + (y1 - self.target_y) ** 2))
+        except:
+            reward2 = 2
+        # reward3 = 1 / reward2
+        # print(reward2, reward3)
+        return reward2 * 10
 
     def search_for_tiles(self, current):
         """Search for new tiles in the maze"""
@@ -121,20 +145,11 @@ class AStar:
             if self.world[x][y] == 0:
                 neighbors.append(Tile(x, y))
 
+        self.liste_reward.append(reward_max)
+
         self.reward_world[direction_max[0]][direction_max[1]] = reward_max
 
         return neighbors
-
-    def reward(self, x1, y1):
-        # print('reward', x1, y1)
-        reward2 = -5
-        try:
-            reward2 = 1 / (math.sqrt((x1 - self.target_x) ** 2 + (y1 - self.target_y) ** 2))
-        except:
-            reward2 = 5
-        # reward3 = 1 / reward2
-        # print(reward2, reward3)
-        return reward2 * 10
 
     def rebuild_path(self, current):
         """Rebuild the path from each tile"""
