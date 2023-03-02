@@ -46,13 +46,20 @@ def plot_samples_b_8_test():
     plt.ylabel("Execution Time (ms)")
 
     # Anzeige des Diagramms
-    plt.show()
+    # plt.show()
 
 
 def line_plot_samples(title, data):
 
     plt.title(title)
-    sns.lineplot(x="complexity", y="samples", hue="algorithm", data=data)
+    sns.lineplot(x="samples", y="reward", hue="algorithm", data=data)
+    plt.show()
+
+
+def line_plot_samples_reward(title, data):
+
+    plt.title(title)
+    sns.lineplot(x="samples", y="reward", hue="algorithm", data=data)
     plt.show()
 
 
@@ -77,9 +84,12 @@ def plot_reward_b_4():
 
 
 def plot_samples_b_8():
-    data = get_data("maze_samples_b_8.csv")
+    data = get_data("test.csv")
 
     line_plot_samples("maze samples with b=8", data)
+
+
+"""plot reward of A*, MCTS, LAP3 with b=16"""
 
 
 def plot_reward_b_8():
@@ -92,6 +102,30 @@ def plot_reward_b_8():
     line_plot_samples("maze samples with b=8", data)
 
 
+"""plot samples vs reward of A*, MCTS, LAP3 with b=8 nad complexity 12x12"""
+
+
+def maze_samples_reward_b_8_complexity_12():
+    data = get_data("maze_samples_reward_b_8_complexity_12.csv")
+
+    line_plot_samples_reward("maze samples reward with b=8 and space complexity 12x12", data)
+
+
+"""plot samples vs reward of A*, MCTS, LAP3 with b=8 nad complexity 24x24"""
+
+
+def maze_samples_reward_b_8_complexity_24():
+    data = get_data("maze_samples_reward_b_8_complexity_24.csv")
+
+    line_plot_samples_reward("maze samples reward with b=8 and space complexity 24x24", data)
+
+
+def maze_samples_reward_b_8_complexity_36():
+    data = get_data("maze_samples_reward_b_8_complexity_36.csv")
+
+    line_plot_samples_reward("maze samples reward with b=8 and space complexity 36x36", data)
+
+
 """plot samples of A*, MCTS, LAP3 with b=16"""
 
 
@@ -101,16 +135,29 @@ def plot_samples_b_16():
     line_plot_samples("maze samples with b=16", data)
 
 
+def maze_samples_reward_astar():
+
+    df = get_data("test.csv")
+    x = df["samples"]
+    y = df["reward"]
+    plt.plot(x, y)
+    plt.show()
+
+
 def main():
 
     # plot_samples_b_4()
-    plot_samples_b_8()
+    # plot_samples_b_8()
     # plot_samples_b_16()
     # box_plot("test")
     # heatmap_plot("test")
     # plot_samples_b_8_test()
     # plot_samples_b_8_test()
     # plot_samples_b_8_with_noise()
+    maze_samples_reward_b_8_complexity_12()
+    maze_samples_reward_b_8_complexity_24()
+    maze_samples_reward_b_8_complexity_36()
+    # maze_samples_reward_astar()
 
 
 if __name__ == "__main__":
