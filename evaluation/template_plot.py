@@ -155,11 +155,15 @@ def plot_samples_b_16():
 
 def maze_samples_reward_astar():
 
-    df = get_data("test.csv")
-    x = df["samples"]
-    y = df["reward"]
+    data = get_data("astar_12.csv")
+
+    line_plot_samples("maze samples with b=8", data)
+    """
+    x = df['samples']
+    y = df['reward']
     plt.plot(x, y)
     plt.show()
+    """
 
 
 def main():
@@ -172,6 +176,7 @@ def main():
     # plot_samples_b_8_test()
     # plot_samples_b_8_test()
     # plot_samples_b_8_with_noise()
+    # maze_samples_reward_astar()
     maze_samples_reward_b_8_complexity_12()
     maze_samples_reward_b_8_complexity_24()
     maze_samples_reward_b_8_complexity_36()
