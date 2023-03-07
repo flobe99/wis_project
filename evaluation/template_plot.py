@@ -108,7 +108,7 @@ def plot_reward_b_8():
 def maze_samples_reward_b_8_complexity_12():
     data = get_data("maze_samples_reward_b_8_complexity_12.csv")
 
-    line_plot_samples_reward("maze samples reward with b=8 and space complexity 12x12", data)
+    line_plot_samples_reward("maze samples reward with and space complexity 12x12", data)
 
 
 """plot samples vs reward of A*, MCTS, LAP3 with b=8 nad complexity 24x24"""
@@ -117,31 +117,31 @@ def maze_samples_reward_b_8_complexity_12():
 def maze_samples_reward_b_8_complexity_24():
     data = get_data("maze_samples_reward_b_8_complexity_24.csv")
 
-    line_plot_samples_reward("maze samples reward with b=8 and space complexity 24x24", data)
+    line_plot_samples_reward("maze samples reward with and space complexity 24x24", data)
 
 
 def maze_samples_reward_b_8_complexity_36():
     data = get_data("maze_samples_reward_b_8_complexity_36.csv")
 
-    line_plot_samples_reward("maze samples reward with b=8 and space complexity 36x36", data)
+    line_plot_samples_reward("maze samples reward with and space complexity 36x36", data)
 
 
 def four_rooms_samples_reward_b_8_complexity_12():
     data = get_data("four_rooms_samples_reward_b_8_complexity_12.csv")
 
-    line_plot_samples_reward("four rooms samples reward with b=8 and space complexity 12x12", data)
+    line_plot_samples_reward("four rooms samples reward with and space complexity 12x12", data)
 
 
 def four_rooms_samples_reward_b_8_complexity_24():
     data = get_data("four_rooms_samples_reward_b_8_complexity_24.csv")
 
-    line_plot_samples_reward("four rooms samples reward with b=8 and space complexity 24x24", data)
+    line_plot_samples_reward("four rooms samples reward with and space complexity 24x24", data)
 
 
 def four_rooms_samples_reward_b_8_complexity_36():
     data = get_data("four_rooms_samples_reward_b_8_complexity_36.csv")
 
-    line_plot_samples_reward("four rooms samples reward with b=8 and space complexity 36x36", data)
+    line_plot_samples_reward("four rooms samples reward with and space complexity 36x36", data)
 
 
 """plot samples of A*, MCTS, LAP3 with b=16"""
@@ -153,9 +153,17 @@ def plot_samples_b_16():
     line_plot_samples("maze samples with b=16", data)
 
 
+def maze_lap_samples_region():
+    data = get_data("maze_lap3_samples_region.csv")
+
+    plt.title("maze samples per region")
+    sns.lineplot(x="samples", y="reward", hue="samples_region", data=data)
+    plt.show()
+
+
 def maze_samples_reward_astar():
 
-    data = get_data("astar_12.csv")
+    data = get_data("maze_astar_12.csv")
 
     line_plot_samples("maze samples with b=8", data)
     """
@@ -184,6 +192,7 @@ def main():
     four_rooms_samples_reward_b_8_complexity_24()
     four_rooms_samples_reward_b_8_complexity_36()
     # maze_samples_reward_astar()
+    # maze_lap_samples_region()
 
 
 if __name__ == "__main__":
