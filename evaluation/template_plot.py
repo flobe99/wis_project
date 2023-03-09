@@ -144,6 +144,24 @@ def four_rooms_samples_reward_b_8_complexity_36():
     line_plot_samples_reward("four rooms samples reward with and space complexity 36x36", data)
 
 
+def four_rooms_2_samples_reward_b_8_complexity_12():
+    data = get_data("four_rooms_2_samples_reward_b_8_complexity_12.csv")
+
+    line_plot_samples_reward("four rooms samples reward with and space complexity 12x12", data)
+
+
+def four_rooms_2_samples_reward_b_8_complexity_24():
+    data = get_data("four_rooms_2_samples_reward_b_8_complexity_24.csv")
+
+    line_plot_samples_reward("four rooms samples reward with and space complexity 24x24", data)
+
+
+def four_rooms_2_samples_reward_b_8_complexity_36():
+    data = get_data("four_rooms_2_samples_reward_b_8_complexity_36.csv")
+
+    line_plot_samples_reward("four rooms samples reward with and space complexity 36x36", data)
+
+
 """plot samples of A*, MCTS, LAP3 with b=16"""
 
 
@@ -185,12 +203,15 @@ def main():
     # plot_samples_b_8_test()
     # plot_samples_b_8_with_noise()
     # maze_samples_reward_astar()
-    maze_samples_reward_b_8_complexity_12()
-    maze_samples_reward_b_8_complexity_24()
-    maze_samples_reward_b_8_complexity_36()
-    four_rooms_samples_reward_b_8_complexity_12()
-    four_rooms_samples_reward_b_8_complexity_24()
-    four_rooms_samples_reward_b_8_complexity_36()
+    # maze_samples_reward_b_8_complexity_12()
+    # maze_samples_reward_b_8_complexity_24()
+    # maze_samples_reward_b_8_complexity_36()
+    # four_rooms_samples_reward_b_8_complexity_12()
+    # four_rooms_samples_reward_b_8_complexity_24()
+    # four_rooms_samples_reward_b_8_complexity_36()
+    four_rooms_2_samples_reward_b_8_complexity_12()
+    # four_rooms_2_samples_reward_b_8_complexity_24()
+    # four_rooms_2_samples_reward_b_8_complexity_36()
     # maze_samples_reward_astar()
     # maze_lap_samples_region()
 

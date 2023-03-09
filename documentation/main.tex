@@ -15,7 +15,7 @@
 
 \setlength{\belowcaptionskip}{5pt}
 
-\title{Comparison path planning algorithms}
+\title{Comparison of different path planning algorithms}
 \author{Manuel Gnannt - 34946, IN \\ Florian Betz - 35653, IN}
 \date{13.03.2023}%\today}
 \begin{document}
@@ -24,79 +24,71 @@
 
 \clearpage
 \section{Abstract}
-In path planning, discovering good trajectories often requires a high-dimensional model and the evaluation of many samples. Recently, Wang et al. proposed an algorithm called \textbf{La}tent Space \textbf{P}artitions for \textbf{P}ath \textbf{P}lanning (LAP3) claiming it outperforms existing path planning methods in 2D navigation tasks with respect to sample efficiency. In this paper, we compare the newly published LAP3 to other path-planning algorithms in several 2D environments.
-\todo[inline]{extend descriptions with all information}
-\todo[inline]{problems, why, solutions, results}
+In path planning, discovering good trajectories often requires a high-dimensional model and the evaluation of many samples. Recently, Wang et al. proposed an algorithm called \textbf{La}tent Space \ac{LaP3} claiming it outperforms existing path planning methods in 2D navigation tasks with respect to sample efficiency. In this paper, we compare the newly published \ac{LaP3} to other path-planning algorithms in several 2D environments.
+\todo[inline]{extend descriptions with all information, Florian}
+%\todo[inline]{problems, why, solutions, results}
 
 \section{Introduction}
-In path planning, the goal is to find the most rewarding trajectory (represented as a sequence of actions at a given state) in a given search space. 
+In path planning, the goal is to find the most rewarding trajectory in a given search space. 
 
-Common problems of path planning algorithms include being trapped at local optima or the exploration-exploitation tradeoff.
-Different applications require different search algorithms.
-An algorithm that works well in one scenario may be inefficient in another. 
-Additionally, the branching factor of a problem can greatly affect the computation time, making it necessary to use specialized search algorithms to handle large branching factors. 
-Furthermore, completeness is an important consideration for search algorithms, as it ensures that the algorithm can always reach the goal. 
-Finally, when searching for an optimal solution, it is necessary to find the solution with the lowest cost, which requires specialized algorithms.
+A common problem faced by approaches like CMA-ES \cite{CMA-ES} is being trapped at local optima. 
+Another is the exploration-exploitation tradeoff. 
+Approaches like VOOT \cite{VOOT} try to tackle both the local optimum problem and the exploration-exploitation tradeoff by partitioning the search space.
+This partitioning however is done independently from the reward function, making it less efficient.
 
-To tackle these problems, Wang et al. proposed LAP3 \cite{NEURIPS2021_03a3655f}, an algorithm which partitions the search space into high- and low-reward regions. These regions are represented in a monte-carlo tree and the path from the current node to the goal is computed.
+For a more efficient search space partitioning, Wang et al. proposed \ac{LaP3} an extension of \ac{La-MCTS} \cite{La-MCTS} where the search space is  partitioned into high- and low-reward regions thus splitting is done based on the reward function.
+%The main difference between \ac{LaP3} and \ac{La-MCTS} is a different calculation of the node values and additional sampling via CMA-ES instead of Bayesian Optimization.
 
-The algorithm differs in the way it takes the samples and partitions the search space. While other path-planning algorithms such as La-MCTS \cite{DBLP:journals/corr/abs-2007-00708} partition the search space based on a few samples and then take additional samples afterwards, LAP3 takes samples first and then recursively partitions the search space based on a minimal number of samples per region.
-
-This paper explores the topic of path planning, with a focus on three specific algorithms A*, LaMCTS, and LaP3. 
-Path planning is an important aspect of robotics and artificial intelligence, as it enables robots and other autonomous systems to navigate through an environment and reach a desired destination. 
-The A* algorithm is a well-known and widely used method for pathfinding and graph traversal, which incorporates heuristic functions and predicted costs to find the most efficient path. 
-LaMCTS and LaP3, on the other hand, are more recent algorithms that have been developed to address specific challenges in path planning, such as handling large or complex environments.
-
-\section{Evaluation Criteria} \label{corner_detection}
-\todo[inline]{short description}
-
+This paper explores the topic of path planning, with a focus on three specific algorithms A*, \ac{La-MCTS}, and \ac{LaP3}. 
 \begin{comment}
-    
-\subsection{Space Complexity}
-Space complexity is a metric that expresses the amount of temporary storage space utilized by an algorithm during its execution. 
-It is represented as $O(f(n))$, where $f(n)$ is the function that describes the storage space required by the algorithm. \cite[p. 303]{TheoryComputation}
-The amount of temporary storage space used during runtime can differ between different algorithms. 
-Some algorithms only require a minimal amount of temporary space and remain constant regardless of the size of the problem and are called "in-situ" which means space-efficient. 
-While other algorithms use multiple temporary work units that are related to the size of the problem, represented as n, and increases as n increases. 
-When n is large, more storage units will be utilized, resulting in a higher space complexity.
+
+\ac{LaMCTS} and \ac{LaP3}, on the other hand, are more recent algorithms that have been developed to address specific challenges in path planning, such as handling large or complex environments.
 \end{comment}
-
-\subsection{Search Efficiency}
-
-Global path planning algorithms create paths based on pre-existing information, while local path planning algorithms generate paths by gathering information about the environment via a sensor. 
-Regardless of the algorithm, it must possess the capability to react quickly to environmental information, have low computational requirements and short search time, and have high search efficiency. Different algorithms exhibit varying levels of search efficiency.
-
-\subsubsection{sample-reward ratio}
-\todo[inline]{descripte criteria, Manuel}
-\subsubsection{function evals reward ratio}
-\todo[inline]{descripte criteria}
 
 \newpage
 \section{Path Planning Algorithms}
 \label{path_planning_algorithm}
-In this paper, we decided to use three different search algorithm A*, \ac{MCTS} and \ac{LaP3}.
+In this paper, we decided to use three different search algorithm A*, \ac{La-MCTS} and \ac{LaP3}.
 
 \subsection{A*}
-\todo[inline]{image? Florian}
+%\todo[inline]{image? Zitat, Florian}
+%\todo[inline]{Seite + Zeilen zu jedem Zitat (Text und image), Florian}
+
 The A* algorithm, first introduced by Peter Hart and other researchers at the Stanford Research Institute in 1968, is a widely used method for pathfinding and graph traversal. \cite{4082128} It builds on Dijkstra's algorithm by incorporating heuristic functions and predicted costs, making it the most efficient direct search method for finding the shortest paths in a static road network and a popular heuristic for various other problems.\cite{ProbabilisticApproachCollaborativeMultiRobotLocalization}
 
-The key component of the algorithm is the design of the valuation function, $f(n) = g(n) + h(n)$, where $g(n)$ is the actual cost from the initial node to node n, $h(n)$ is the estimated cost from node n to the target node, and $f(n)$ is the estimated cost from the initial node via node n to the target node.
-
-The steps of the A* algorithm are:
+The key component of the algorithm is the design of the valuation function, $f(n) = g(n) + h(n)$, where $g(n)$ is the actual cost from the initial node to node n, $h(n)$ is the estimated cost from node n to the target node, and $f(n)$ is the estimated cost from the initial node via node n to the target node. The A* algorithm can reach a time complexity of $O(n)$.
 
 \textbf{Step 1:} Add the starting node to the priority queue.
-
+\newline
 \textbf{Step 2:} Select the node with the smallest F-value from the current priority queue and make it the current node.
-
+\newline
 \textbf{Step 3:} Mark it as visited and process its adjacent nodes.
-
+\newline
 \textbf{Step 4:} If the neighboring node has not been visited, add it to the queue, set the current node as its parent, and record its F, H, and G values. If the neighboring node has already been visited, check if the current node has a shorter path by comparing G values. If the current node has a smaller G value, update the parent node and G, H values of that node.
-
+\newline
 \textbf{Step 5:} Repeat steps 2 to 4 until the target node is marked or the priority queue is empty.
-
+\newline
 \textbf{Step 6:} When the path is found, trace back from the endpoint to the start node using the parent node.
 
-The A* algorithm can reach a time complexity of $O(n)$.
+
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.3\linewidth}
+		\includegraphics[width=\linewidth]{img/a_-search-algorithm.png}
+        \caption{Astar path}	
+    \end{subfigure}
+	\hspace{0.02\textwidth}
+	\begin{subfigure}[b]{0.3\linewidth}
+		\includegraphics[width=\linewidth]{img/a_-search-algorithm-euclidian_distance.png}
+		\caption{Euclidean Distance Heuristics}
+	\end{subfigure}
+ 	\caption{Astar \cite{Pic:astar}}
+	\label{fig:differentenvironments}
+\end{figure}
+
+\begin{comment}
+    
 
 \subsection{Monte-Carlo Tree-Search}
 \todo[inline]{unbedingt notwendig?}
@@ -118,83 +110,93 @@ The tree now learns by performing the following steps:
 \textbf{Step 3: Simulation} The reward of the newly created leaves is calculated and the best nodes are added to the tree.
 
 \textbf{Step 4: Backpropagation} All nodes above the selected one are updated based on the reward they lead to.
+\end{comment}
+\newpage
+\subsection{La-MCTS}
+The basic idea of a Latent Action Monte-Carlo Tree-search (La-MCTS) is to recursively split the search space with every region representing a node in a Monte-carlo tree.\cite{La-MCTS}
+As shown in figure \ref{fig:laMCTS_sampling_plitting}, this is done by taking some samples from the search space and splitting it into a high- and a low-reward section using K-means(k=2). 
+An SVM then learns this boundary and the two sections can be represented as nodes in a monte carlo tree.
+In our example, the high-reward section is represented by the left node and the low-reward section by the right node.
 
-\subsection{LaMCTS}
-\todo[inline]{Schreieben Manuel!}
-In a Latent space Monte-Carlo Tree-search, the search space is represented using a monte carlo tree. This is done by taking samples and splitting the search space in a high-reward partition and a low-reward partition using k-keans(k=2) and an SVM learning the boundary. These partitions are represented by two child nodes in the monte-carlo tree. In a next step, samples are taken from around each cluster center and based on these samples, the now child-node is partitioned again in a high- and low-reward region. This results in a monte carlo tree with the left-most leaf being the highest-reward region, the leaf left to the highest one being the second-highest and so on.
-\begin{figure}[h!]
-    \centering
-    \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{img/lamcts_1.png}
-    \caption{La-MCTS sampling and splitting \cite{DBLP:journals/corr/abs-2007-00708}}
-    \label{fig:mesh1}
-    \end{subfigure}
-    \hspace{0.02\textwidth}
-    \begin{subfigure}[b]{0.3\linewidth}
-    \centering
-    \includegraphics[width=\textwidth]{img/lamcts_2.png}
-    \caption{La-MCTS sampling around cluster center \cite{DBLP:journals/corr/abs-2007-00708}}
-    \label{fig:mesh1}
-    \end{subfigure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width = {0.35\textwidth}]{img/lamcts_1.png}
+	\caption{\ac{La-MCTS} sampling and splitting \cite{La-MCTS}[p.3]}
+	\label{fig:laMCTS_sampling_plitting}
+\end{figure}
+As shown in in figure \ref{fig:laMCTS_workflow}, this process is now repeated by selecting a node until a leaf node is reached, taking samples along the corresponding section and splitting it again. 
+This results in a tree structure with the leftmost node representing the section with the highest reward. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width = {\textwidth}]{img/lamcts_workflow.png}
+	\caption{Steps of \ac{MCTS} \cite{La-MCTS}[p.4]}
+	\label{fig:laMCTS_workflow}
 \end{figure}
 
-\todo[inline]{verweis auf paper quelle, indem der MCTS beschrieben wird}
-
 \begin{comment}
-\subsubsection{Selection}
-With the help of an evaluation function (heuristic), the selection of a node s follows. 
-However, it should be noted that non-preferred nodes should also be considered.
-In some cases, the non-preferred nodes may have a higher value.With the help of an evaluation function (heuristic), the selection of a node s follows. 
-However, it should be noted that non-preferred nodes should also be considered.
-In some cases, the non-preferred nodes may have a higher value.
+    
 
-\subsubsection{Expansion} 
-In this step, the children of the selected node s are considered. 
-If there are one or more children that have not yet been expanded, these children are added to the search tree.
-These children are added to the search tree. 
-However, if all children of the nodes have been expanded, then another or also a child node s is selected and
-the expansion step is then executed on the nodes.
+In a Latent space Monte-Carlo Tree-search, the search space is partitioned into a high- and low-reward section using K-means (k=2) and an SVM learning the boundary. These sections are represented as nodes in a monte-carlo tree. The value of each node
 
-\subsubsection{Simulation} 
-The search policy follows from this step. Here, playouts are executed on the newly added child nodes.
-child nodes that have been added. There are also two options for the playout.
-One chooses purely random moves without knowing the rules of the game.
-One uses a heuristic so that there is less randomness present
-Looking at the last moves, which lets you know beforehand if you missed/achieved the goal).
-In a nutshell, it means that from the newly added child node to a hand
-random moves are chosen.
+This is done by creating a dataset consisting of (x, f few samples and splitting the search space in a high-reward partition and a low-reward partition using K-means(k=2) and an SVM learning the boundary. These partitions are represented by two child nodes in the monte-carlo tree. In a next step, samples are taken from around each cluster center and based on these samples, the now child-node is partitioned again in a high- and low-reward region. This results in a monte carlo tree with the left-most leaf being the highest-reward region, the leaf left to the highest one being the second-highest and so on.
 
-\subsubsection{Backpropagation}
-Finally, the last step Backpropagation occurs. After a leaf is reached by the simulation, all nodes in the search tree are updated.
-In addition, for each node j traversed, the simulation number nj is incremented by one is increased.
 \end{comment}
 
-\subsection{LaP3}
-The LaP3 algorithm works similar to La-MCTS. Contrary to La-MCTS, Samples are collected at the beginning and the search space is then split recursively into good and bad regions until a threshold of samples is undercut.
 
-\todo[inline]{write LaP3 algorithm!!! Manuel}
-The \ac{LaP3} algorithm is an extension of the LaMCTS. \cite{NEURIPS2021_03a3655f}
+\subsection{LaP3}
+%https://www.youtube.com/watch?v=-4Lzk_s_Dzw
+\ac{LaP3} The search space is partitioned into regions by drawing samples and recursively splitting by reward. The value/UCB of a node is calculated using the maximum value instead of the mean.(formula) Afterwards a path to the child nodes is planned using CMA-ES\cite{CMA-ES}.
+\cite{NEURIPS2021_03a3655f}
 It is a new path planning method which improves the function value estimation within each sub-region.
 This algorithm use a latent representation of the search space.
-\ac{LaP3} and \ac{LaMCTS} use the maximum, instead of the mean, as the node score to improve sample efficiency.
+\ac{LaP3} and \ac{La-MCTS} use the maximum, instead of the mean, as the node score to improve sample efficiency.
+
+\todo[inline]{Text und Bilder + Formeln aus dem Paper, Manuel}
 
 \newpage
 \section{Methodology}
-A common problem of path planning is being trapped in local minima[...] thus suitable environments were selected for the algorighms
+We ran \ac{LaP3}, \ac{La-MCTS} and an A* on two different environments with both environments containing local optima. For each environment, the experiment was run on a 12x12, a 24x24 and a 36x36 grid. As the goal is finding a sample efficient trajectory the number of samples was used as a metric in relation to the reward. The reward was calculated by the inverse of the euclidian distance to the target. It can be described by following formula. 
 
-We ran all 3 algorithms on two different environments (mazes3, 4 rooms)
-\todo[inline]{Was haben wir haben? Manuel}
-\todo[inline]{Warum haben wir es gemacht? Manuel}
-\todo[inline]{environment description Manuel, Maze s3 and four rooms images Florian}
+\begin{equation}
+\left\{
+\begin{array}{lll}
+ r(\vec{x})=\frac{10}{\sqrt{\Delta x_1 ^2+\Delta x_2 ^2}}\quad \Delta x_1 + \Delta x_2 \neq 0\\
+r(\vec{x})=15\quad \Delta x_1 + \Delta x_2 =0\\
+\end{array}
+\right.
+\end{equation}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.3\linewidth}
+		\includegraphics[width=\linewidth]{img/Maze_s3.png}
+        \caption{Maze S3 environemt}	
+    \end{subfigure}
+	\hspace{0.02\textwidth}
+	\begin{subfigure}[b]{0.3\linewidth}
+		\includegraphics[width=\linewidth]{img/Four_Rooms.png}
+		\caption{Four Rooms}
+	\end{subfigure}
+ 	\caption{different environments}
+	\label{fig:differentenvironments}
+\end{figure}
+
+\todo[inline]{four rooms change target position, replace right image, Florian}
+
+\subsection{Search Efficiency}
+The goal in path planning is to find the most rewarding trajectory in the search space.
+As the optimum can eventually be found by random sampling if the number of samples is high enough, an efficient algorithm is preferred.
+The search efficiency of an algorithm can therefore be described by the number of samples and the achieved reward.
+As this metric is used widely when comparing different search algorithms, \cite{La-MCTS}, \cite{LaNAS}, \cite{VOOT}, we also used it for comparison.
+
+\todo[inline]{LaNas wird als Acronym nicht verwendet}
+
+
+
 \newpage
 \section{Evaluation}
-
-\todo[inline]{Write short introduction into the chapter, Florian}
-\todo[inline]{Astar mit anderem Verzweigungsfaktor}
-\todo[inline]{mehr Daten damit Astar mit MCTS und LAP3 besser verglichen werden}
-\todo[inline]{if lenyvec good größer 5 wie viele samples pro region immer beide ändern}
-%\todo[inline]{MCTS in LaMCTS abändern}
-
 
 %1. LaP3 Algorithmus wurde entwickelt, der die Pfade schneller berechnet
 %2. LAP3 performt besser als der MCTS und A*
@@ -203,79 +205,116 @@ We ran all 3 algorithms on two different environments (mazes3, 4 rooms)
 %5. Was sind unsere Ergebnisse, Performt LAP3 tatsächlich immer besser?
 %6. Was kann in Zukunft noch nageschaut werden?
 
-When each algorithm is run, the maximum reward to be achieved is compared to the number of samples taken. As this result can vary, each algorithm is run 100 times and the mean of each run is shown in a graph.
+With the evaulation criteria and the different environment, the search algorithms are examined to see if the \ac{LaP3} performs better from several points of view.
+Figure \ref{fig:SampleRewardMazeDifferentSpaceComplexity} shows the number of samples drawn and the associated reward in different environments with different complexities.
+The environment is the maze s3 with complexity size 12x12, 24x24 and 36x36
+The A* always delivers the same results, but \ac{La-MCTS} and \ac{LaP3} deliver different results on hundred runs and 
+That is why the mean value and the lower and upper bound of the 95\% confidence interval are displayed in the graphs.
+It can be seen that the \ac{LaP3} gets a larger reward than the \ac{La-MCTS} and A* with the same number of samples.
+Although the \ac{LaP3} has a high variance, the reward increases consistently with increasing samples.
+However, the \ac{LaP3} algorithm has a very large scattering of the delivered results.
+For the \ac{La-MCTS}, an increase in variance does not occur until a sample size of 42 in a 12x12 environment and a sample size of 55 in a 24x24 and 36x36 environment.
+The reward from the A* fluctuates continuously, but the reward does not increase as the number of samples increases.
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\begin{subfigure}[b]{0.3\linewidth}
-		\includegraphics[width=\linewidth]{img/la-mcts.png}
-        \caption{LaMCTS with mean and standard deviation}	
-    \end{subfigure}
-	\hspace{0.02\textwidth}
-	\begin{subfigure}[b]{0.3\linewidth}
-		\includegraphics[width=\linewidth]{img/LAP3.png}
-		\caption{LAP3 with mean and standard deviation}
-	\end{subfigure}
-	\hspace{0.02\textwidth}
-	\begin{subfigure}[b]{0.3\linewidth}
-		\includegraphics[width=\linewidth]{img/comparison.png}
-        \caption{mean of La-MCTS and LAP3}
-	\end{subfigure}
-	\caption{In maze s3 environment}
-	\label{fig:known_problems}
-\end{figure}
-
-
-
-\begin{figure}[h!]
-	\centering
-	\begin{subfigure}[b]{0.3\linewidth}
-		\includegraphics[width=\linewidth]{img/maze_samples__reward_b_8_LAP3_MCTS_12.png}
+		\includegraphics[width=\linewidth]{img/maze_samples__reward_b_8_LAP3_MCTS_AStar_interrupted_12.png}
         \caption{space complexity 12x12}	
     \end{subfigure}
-	\hspace{0.02\textwidth}
+	%\hspace{0.02\textwidth}
 	\begin{subfigure}[b]{0.3\linewidth}
-		\includegraphics[width=\linewidth]{img/maze_samples__reward_b_8_LAP3_MCTS_24.png}
+		\includegraphics[width=\linewidth]{img/maze_samples__reward_b_8_LAP3_MCTS_AStar_interrupted_24.png}
 		\caption{space complexity 24x24}
 	\end{subfigure}
-	\hspace{0.02\textwidth}
+	%\hspace{0.02\textwidth}
 	\begin{subfigure}[b]{0.3\linewidth}
-		\includegraphics[width=\linewidth]{img/maze_samples__reward_b_8_LAP3_MCTS_36.png}
+		\includegraphics[width=\linewidth]{img/maze_samples__reward_b_8_LAP3_MCTS_AStar_interrupted_36.png}
         \caption{space complexity 36x36}
 	\end{subfigure}
 	\caption{ratio of samples and reward in Maze s3 environment with different space complexity}
-	\label{fig:known_problems}
+	\label{fig:SampleRewardMazeDifferentSpaceComplexity}
 \end{figure}
 
-\begin{figure}[h!]
+Figure \ref{fig:SampleRewardFourRoomsDifferentSpaceComplexity} shows the ratio of samples drawn and the associated reward in the four rooms environment with complexity size 12x12, 24x24 and 36x36.
+As in the maze s3 environment, the A* generates a low reward with a low number of samples. 
+Only in the 12x12 environent with a sample number of 40 does the reward increase and achieve a similar reward to the \ac{La-MCTS}.
+With greater space complexity, the reward remains constantly low.
+The \ac{La-MCTS} corresponds to a growing exponential function with constant mean.
+The \ac{LaP3} on the other hand has a strong growth of the rewards at the beginning. With increasing sample number, however, the growth is reduced. However, the reward of \ac{LaP3} is larger than that of \ac{La-MCTS} and A* at each sample number.
+
+\begin{figure}[H]
 	\centering
 	\begin{subfigure}[b]{0.3\linewidth}
-		\includegraphics[width=\linewidth]{img/four_rooms_samples__reward_b_8_LAP3_MCTS_12.png}
+		\includegraphics[width=\linewidth]{img/four_rooms_samples__reward_b_8_LAP3_MCTS_AStar_interrupted_12.png}
         \caption{space complexity 12x12}	
     \end{subfigure}
 	\hspace{0.02\textwidth}
 	\begin{subfigure}[b]{0.3\linewidth}
-		\includegraphics[width=\linewidth]{img/four_rooms_samples__reward_b_8_LAP3_MCTS_24.png}
+		\includegraphics[width=\linewidth]{img/four_rooms_samples__reward_b_8_LAP3_MCTS_AStar_interrupted_24.png}
 		\caption{space complexity 24x24}
 	\end{subfigure}
 	\hspace{0.02\textwidth}
 	\begin{subfigure}[b]{0.3\linewidth}
-		\includegraphics[width=\linewidth]{img/four_rooms_samples__reward_b_8_LAP3_MCTS_36.png}
+		\includegraphics[width=\linewidth]{img/four_rooms_samples__reward_b_8_LAP3_MCTS_AStar_interrupted_36.png}
         \caption{space complexity 36x36}
 	\end{subfigure}
 	\caption{ratio of samples and reward in four rooms environment with different space complexity}
-	\label{fig:known_problems}
+	\label{fig:SampleRewardFourRoomsDifferentSpaceComplexity}
 \end{figure}
 
+What is striking in both environments is that the \ac{LaMCTS} has a constant reward function. In the beginning, the reward is constant and increases exponentially after 40 samples.
+The \ac{LaP3}
 
-Each algorithm was 
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+& {12x12} & {24x24} & {36x36} \\ \hline
+Samples & $\overline{x}$ & $\overline{x}$ &  $\overline{x}$ \\ \hline
+20 & 9.9208     & 3.9697  & 2.8462 \\ \hline
+25 & 8.1711     & 3.9062  & 3.1538 \\ \hline
+30 & 7.4318     & 2.4773  & 1.7554 \\ \hline
+35 & 10.6842    & 5.25    & 4.7949 \\ \hline
+40 & 11.3       & 4.9394  & 2.8718 \\ \hline
+45 & 9.625      & 6.5938  & 2.9231 \\ \hline
+50 & 10.8485    & 5.625   & 3.1538 \\ \hline
+55 & 9.7692     & 4.6364  & 5.0513 \\ \hline
+60 & 8.5443     & 3.2197  & 2.2536 \\ \hline
+\end{tabular}
+\caption{mean and 95\% confidence interval of \ac{LaP3} with different numbers of samples drawn in maze s3 environment}
+\label{tab:mean_std_diff_sizes}
+\end{table}
 
-When running each algorithm for 100 times, the 
+
+
+\begin{comment}
+    
+To improve the data dispersion in the \ac{LaP3} algorithm, the number of samples per region can be increased. In Figure \ref{fig:SampleRewardMazeDifferentSpaceComplexity}, 5 samples per region were drawn.
+
+5 samples per region:
+$\overline{x}$=8.4629
+$\sigma$=4.2731 \newline
+10 samples per region:
+$\overline{x}$=7.9001
+$\sigma$=4.2480 \newline
+15 samples per region:
+$\overline{x}$=9.0118
+$\sigma$=4.7755
+
+Changing the number of samples per region does not reduce the reward dispersion in the \ac{LaP3} algorithm.
+\end{comment}
+\todo[inline]{Aussage beantwortet, \ac{LaP3} performt immer besser}
+%\todo[inline]{if lenyvec good größer 5 wie viele samples pro region immer beide ändern}
 
 
 \section{Conclusions and Further Discussion}
+Different sampling methods
 
 \todo[inline]{What could be explorer in the future}
+
+\todo[inline]{functions evals?, Manuel}
+\todo[inline]{sample drawing in sequential action space (horiyon tto draw samples from, not whole search space), Manuel}
 
 \clearpage
 
@@ -286,10 +325,10 @@ When running each algorithm for 100 times, the
 \begin{acronym}[....]
     \acro{LaP3}{Latent Space Partitions for Path Planning}
     \acro{MCTS}{Monte Carlo Tree Search}
-    \acro{LaMCTS}{Latent Space Monte Carlo Tree Search}
+    \acro{La-MCTS}{Latent Action Monte Carlo Tree Search}
+    \acro{LaNas}{Latent Space Neural Architecture Search}
 \end{acronym}
 
 \bibliographystyle{alpha}
 \bibliography{literature}
-\todo[inline]{Alphabetisch sortieren}
 \end{document}

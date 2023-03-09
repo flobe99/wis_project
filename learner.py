@@ -5,6 +5,7 @@ import numpy as np
 from colorama import Fore, Back, Style
 import time
 import sys
+import csv
 
 from astar import AStar
 from matplotlib import pyplot as plt
@@ -17,10 +18,12 @@ from scipy.spatial import ConvexHull, convex_hull_plot_2d
 
 
 class World:
-    def __init__(self, p_dim_x=12, p_dim_y=12):
+    def __init__(self, p_dim_x=12, p_dim_y=12, p_samples=20):
         self.epsilon = 0.2
         self.dim_x = p_dim_x
         self.dim_y = p_dim_y
+
+        self.samples = p_samples
 
         self.arr1 = np.zeros([self.dim_x, self.dim_y])
         self.arr2 = np.zeros([self.dim_x, self.dim_y])
@@ -28,11 +31,11 @@ class World:
         self.pos_x = 0
         self.pos_y = 0
 
-        self.target_x = self.dim_x - 1
-        self.target_y = 1
+        self.target_x = x = int(self.dim_y / 2) + 1
+        self.target_y = int(self.dim_x / 2) + 1
 
-        self.reset_board("maze s3")
-        # self.reset_board("4 rooms")
+        # self.reset_board("maze s3")
+        self.reset_board("4 rooms")
 
         self.directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
         # self.directions = [[0, 1], [0, -1], [1, 0], [1, 1], [1, -1], [-1, 0], [-1, 1], [-1, -1]]
@@ -93,13 +96,10 @@ class World:
         goal = (self.target_x, self.target_y)
 
         astar = AStar(self.arr1, self.arr2)
-        path, sample_count, self.arr2 = astar.search(start, goal)
+        path, sample_count, max_reward, samples_liste, reward_liste = astar.search(start, goal)
 
-        # find maximum reward in grid
-        max_reward = float("-inf")
-        for row in self.arr1:
-            for col in row:
-                max_reward = max(max_reward, col)
+        # print("samples Liste", samples_liste)
+        # print("reward Liste", reward_liste)
 
         print("Maximum reward:", max_reward)
         print("Sample Count:", sample_count)
@@ -110,6 +110,12 @@ class World:
 
             self.arr1[start[0]][start[1]] = 3
             self.arr1[goal[0]][goal[1]] = 3
+        for i in range(len(samples_liste)):
+            if i == 66:
+                break
+            with open("evaluation/four_rooms_2_samples_reward_b_8_complexity_12.csv", "a", newline="") as csv_file:
+                writer = csv.writer(csv_file)
+                writer.writerow([36, "A*", samples_liste[i], reward_liste[i], 8])
 
     def get_directions(self):
         self.possible_directions = []
@@ -165,7 +171,7 @@ class World:
         try:
             reward2 = 1 / (math.sqrt((x1 - self.target_x) ** 2 + (y1 - self.target_y) ** 2))
         except:
-            reward2 = 5
+            reward2 = 2
         # reward3 = 1 / reward2
         # print(reward2, reward3)
         return reward2 * 10
@@ -208,7 +214,7 @@ class World:
             for i in range(int(self.dim_x / 3), int(self.dim_y / 2) + 1):
                 self.arr1[i][y] = 1
 
-        if world_type == "4 rooms":
+        elif world_type == "4 rooms":
             # vertical
             y = int(self.dim_x / 2)
             dy = int(y / 2)
@@ -499,7 +505,7 @@ class World:
                 pass
         self.max_reward.append(rew_temp)
 
-        if self.treeleaves2_index < 7:
+        if self.treeleaves2_index < 11:
             self.lamcts(d1["id"])
             self.lamcts(d2["id"])
 
@@ -585,7 +591,8 @@ class World:
         print("max_reward")
         print(self.max_reward)
 
-        plt.show()
+        # plt.show()
+        return self.num_samples, self.max_reward
 
     def lap3(self, leaf_id, sampling, samples_1, samples_2):
         print("------- LAP3", leaf_id, sampling, samples_1, samples_2, "--------")
@@ -598,7 +605,7 @@ class World:
                 clcy = leaf2["mean_y"]
                 leaf_temp = leaf2
         if sampling == True:
-            self.take_samples(35)
+            self.take_samples(self.samples)
             samples_x = self.samples_x
             samples_y = self.samples_y
         else:
@@ -843,60 +850,78 @@ class World:
                 pass
         print("max reward", max_reward)
 
-        plt.show()
+        # plt.show()
+
+        return self.samples, max_reward
 
 
 def execute_astar():
     print("execute astar")
-    w1_astar = World()
+    w1_astar = World(12, 12)
     w1_astar.a_star()  # search with AStar
     print("\nAStar Path")
     w1_astar.print_board(w1_astar.arr1)
-    print("\nAStar Reward")
-    w1_astar.print_board(w1_astar.arr2)
-
-    max_reward = float("-inf")
-    for row in w1_astar.arr2:
-        for col in row:
-            max_reward = max(max_reward, col)
-    print("max reward", max_reward)
+    # print("\nAStar Reward")
+    # w1_astar.print_board(w1_astar.arr2)
 
 
 def execute_mcts():
-    print("execute mcts")
-    # print(print(w1_mcts.arr1))
-    # print("\nStart Grid")
-    # w1_mcts.print_board(w1_mcts.arr1)
+    try:
+        print("execute mcts")
+        # print(print(w1_mcts.arr1))
+        # print("\nStart Grid")
+        # w1_mcts.print_board(w1_mcts.arr1)
 
-    # w1_mcts.treesearch_simple(800)
-    w1_mcts = World(12, 12)
-    w1_mcts.take_samples(15)
-    w1_mcts.lamcts(0)
+        # w1_mcts.treesearch_simple(800)
+        w1_mcts = World(12, 12)
+        w1_mcts.treewalk()
+        w1_mcts.take_samples(15)
+        w1_mcts.lamcts(0)
 
-    print("board1")
-    w1_mcts.print_board(w1_mcts.arr1)
-    w1_mcts.treewalk()  # search with random search
+        print("board1")
+        w1_mcts.print_board(w1_mcts.arr1)
+        w1_mcts.treewalk()  # search with random search
 
-    print("")
-    print("Arr2")
-    print(w1_mcts.arr2)
-    print("")
+        print("")
+        print("Arr2")
+        print(w1_mcts.arr2)
+        print("")
 
-    w1_mcts.print_board(w1_mcts.arr1)
-    w1_mcts.plot_lamcts()
+        w1_mcts.print_board(w1_mcts.arr1)
+        num_samples, max_reward = w1_mcts.plot_lamcts()
+
+        for i in range(len(num_samples)):
+            with open("evaluation/four_rooms_2_samples_reward_b_8_complexity_12.csv", "a", newline="") as csv_file:
+                writer = csv.writer(csv_file)
+                writer.writerow([12, "MCTS", num_samples[i], max_reward[i], 8])
+    except:
+        print("Error in execution")
 
 
 def execute_lap3():
-    w1_lap3 = World()
-    w1_lap3.lap3(0, True, [], [])
-    w1_lap3.lap3_predict(0, [0, 0])
-    w1_lap3.plot_lap3()
+    samples_count = 40
+    while samples_count <= 65:
+        try:
+            w1_lap3 = World(12, 12, p_samples=samples_count)
+            w1_lap3.lap3(0, True, [], [])
+            w1_lap3.lap3_predict(0, [0, 0])
+            samples, max_reward = w1_lap3.plot_lap3()
+
+            with open("evaluation/four_rooms_2_samples_reward_b_8_complexity_12.csv", "a", newline="") as csv_file:
+                writer = csv.writer(csv_file)
+                writer.writerow([12, "LAP3", samples, max_reward, 8])
+
+        except:
+            print("error in execution")
+        samples_count = samples_count + 5
 
 
 def main():
-    execute_astar()
-    execute_mcts()
-    execute_lap3()
+    # execute_astar()
+    for i in range(100):
+        print("iteration: ", i)
+        # execute_mcts()
+        execute_lap3()
 
 
 if __name__ == "__main__":
