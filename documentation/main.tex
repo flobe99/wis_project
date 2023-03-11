@@ -25,7 +25,7 @@
 \clearpage
 \section{Abstract}
 Path planning technology relies on path planning algorithms, which have varying levels of search and planning efficiency depending on their application environment.
-In path planning, the discovery of good trajectories often requires a high-dimensional model and the evaluation of many samples.
+\todo[inline]{extend descriptions with all information}
 Recently, Wang et al. proposed an algorithm called \ac{LaP3}, which they claimed outperforms existing path planning methods in 2D navigation tasks in terms of sampling efficiency. 
 With the increasing number of path planning algorithms and the complexity of the environment, it becomes more and more difficult to fulfill the actual requirements of path planning and to achieve the desired path planning results.
 In this paper, we compare the newly published \ac{LaP3} with other path planning algorithms in different 2D environments.
@@ -40,15 +40,20 @@ Another problem is the exploration- exploitation tradeoff.
 Approaches such as \ac{VOOT} \cite{VOOT} attempt to tackle both the local optimum problem and the exploration-exploitation tradeoff by partitioning the search space.
 However, this partitioning is done independently of the reward function, which makes it less efficient.
 
-For more efficient search space partitioning, Wang et al. proposed\ac{LaP3} an extension of \ac{La-MCTS} \cite{La-MCTS}, in which the search space is partitioned into high and low reward regions thus splitting is done based on the reward function.
+A common problem faced by approaches like \ac{CMA-ES} \cite{CMA-ES} is being trapped at local optima. 
+%The main difference between \ac{LaP3} and \ac{La-MCTS} is a different calculation of the node values and additional sampling via \ac{CMA-ES} instead of Bayesian Optimization.
+Approaches like \ac{VOOT} \cite{VOOT} try to tackle both the local optimum problem and the exploration-exploitation tradeoff by partitioning the search space.
 %The main difference between \ac{LaP3} and \ac{La-MCTS} is a different calculation of the node values and additional sampling via \ac{CMA-ES} instead of Bayesian Optimization.
 This paper explores the topic of path planning, with a focus on three specific algorithms A*, \ac{La-MCTS}, and \ac{LaP3}. 
-
 \section{Path Planning Algorithms}
 \label{path_planning_algorithm}
 In this paper, we decided to use three different search algorithms A*, \ac{La-MCTS} and \ac{LaP3}.
 
 \subsection{A*}
+\textbf{Step 2:} Select the node with the smallest F-value from the current priority queue and make it the current node. Use the Euclidean Distance Heuristics from figure \ref{fig:EuclideanDistanceHeuristics}
+\textbf{Step 4:} If the neighboring node has not been visited, add it to the queue, set the current node as its parent, and record its F, H, and G values. 
+If the neighboring node has already been visited, check if the current node has a shorter path by comparing G values. See in figure \ref{fig:astar_path}.
+If the current node has a smaller G value, update the parent node and G, H values of that node.
 
 The A* algorithm is a widely used method for heuristic path finding and graph traversal. \cite{4082128} \cite{ProbabilisticApproachCollaborativeMultiRobotLocalization}
 It builds on Dijkstra's algorithm by incorporating heuristic functions and predicted costs, making it the most efficient direct search method for finding shortest paths for various problems.\cite{ProbabilisticApproachCollaborativeMultiRobotLocalization}
@@ -76,8 +81,6 @@ This implies that the actual costs from node n to the target are never overestim
  	\caption{A* algorithm \cite{Pic:astar}}
 	\label{fig:astar}
     \vspace{-15pt}
-\end{figure}
-
 Algorithm steps: \cite{app9061057} \newline
 \textbf{step 1:} Insert the starting node into a priority queue.
 \newline
@@ -92,10 +95,6 @@ If the current node has a smaller G value, update the parent node and the G and 
 \textbf{step 5:} Repeat steps 2 through 4 until the target node is marked or the priority queue is empty.
 \newline
 \textbf{step 6:} Once the path is discovered, follow the parent node from the endpoint to the start node.
-
-
-
-
 
 \newpage
 \subsection{La-MCTS}
@@ -137,6 +136,8 @@ For each environment, the experiment was run on a 12x12, a 24x24, and a 36x36 gr
 Since the goal is to find a sampling efficient trajectory, the number of samples was used as a metric in relation to the reward.
 The reward was calculated by the inverse of the Euclidean distance to the target. It can be described by the following formula.
 
+%\todo[inline]{formelzeichen beschreiben}
+
 \begin{equation}
 \left\{
 \begin{array}{lll}
@@ -167,7 +168,6 @@ The goal in path planning is to find the most rewarding trajectory in the search
 Since the optimum can eventually be found by random sampling, if the number of samples is high enough, an efficient algorithm is preferred.
 Therefore, the search efficiency of an algorithm can therefore be described by the number of samples and the achieved reward.
 Since this metric is widely used in comparing different search algorithms, \cite{La-MCTS}, \cite{LaNAS}, \cite{VOOT}, we also used it for comparison.
-\newpage
 \section{Evaluation}
 
 %1. LaP3 Algorithmus wurde entwickelt, der die Pfade schneller berechnet
@@ -303,7 +303,6 @@ As we can see in Figure \ref{fig:maze_complexity_reward_lap3_lamcts_astar}, the 
     \caption{first 60 samples drawn in maze s3 environment with different complexity}
     %\label{fig:mean_complexity_reward}
 \end{figure}
-\end{comment}
 %\todo[inline]{Aussage beantwortet, \ac{LaP3} performt immer besser}
 %\todo[inline]{Schaubild 7 beschreiben}
 %\todo[inline]{\ac{LaP3} beschreiben, dass man in ein locales minumu leicht reinkommt}
@@ -318,8 +317,8 @@ However, we did not examine the single improvements of \ac{LaP3} over \ac{La-MCT
 In addition, search efficiency could be measured not in absolute terms (number of samples), but based on the size of the search space they explore. 
 This would facilitate the comparison of different space complexities (12x12, 24x24, etc.).
 It would also be interesting to know if \ac{LaP3} would still outperform the other algorithms by the same amount if sampling the entire search space were not possible.
-
 %The aim is to prove that the \ac{LaP3} algorithm has a better result than its forerunners \ac{La-MCTS} and A* under different conditions.
+
 
 
 
