@@ -181,15 +181,38 @@ def maze_lap_samples_region():
 
 def maze_samples_reward_astar():
 
-    data = get_data("maze_astar_12.csv")
+    df = pd.read_csv("maze_sample_reward_gesamt.csv", index_col=False)
 
-    line_plot_samples("maze samples with b=8", data)
-    """
-    x = df['samples']
-    y = df['reward']
-    plt.plot(x, y)
+    df = df[df.algorithm != "LAP3"]
+    df = df[df.algorithm != "LaMCTS"]
+
+    plt.title("maze samples A*")
+    sns.lineplot(x="samples", y="reward", hue="complexity", data=df, palette=["r", "g", "b"])
     plt.show()
-    """
+
+
+def maze_samples_reward_mcts():
+
+    df = pd.read_csv("maze_sample_reward_gesamt.csv", index_col=False)
+
+    df = df[df.algorithm != "LAP3"]
+    df = df[df.algorithm != "A*"]
+
+    plt.title("maze samples LAMCTS")
+    sns.lineplot(x="samples", y="reward", hue="complexity", data=df, palette=["r", "g", "b"])
+    plt.show()
+
+
+def maze_samples_reward_lap3():
+
+    df = pd.read_csv("maze_sample_reward_gesamt.csv", index_col=False)
+
+    df = df[df.algorithm != "A*"]
+    df = df[df.algorithm != "LaMCTS"]
+
+    plt.title("maze samples LaP3")
+    sns.lineplot(x="samples", y="reward", hue="complexity", data=df, palette=["r", "g", "b"])
+    plt.show()
 
 
 def main():
@@ -209,11 +232,14 @@ def main():
     # four_rooms_samples_reward_b_8_complexity_12()
     # four_rooms_samples_reward_b_8_complexity_24()
     # four_rooms_samples_reward_b_8_complexity_36()
-    four_rooms_2_samples_reward_b_8_complexity_12()
+    # four_rooms_2_samples_reward_b_8_complexity_12()
     # four_rooms_2_samples_reward_b_8_complexity_24()
     # four_rooms_2_samples_reward_b_8_complexity_36()
     # maze_samples_reward_astar()
     # maze_lap_samples_region()
+    maze_samples_reward_astar()
+    maze_samples_reward_mcts()
+    maze_samples_reward_lap3()
 
 
 if __name__ == "__main__":
